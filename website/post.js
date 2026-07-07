@@ -172,7 +172,7 @@ const browser = await puppeteer.launch(
         executablePath: await chromium.executablePath(),
         headless: true
       }
-    : {headless: true}
+    : {args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-gpu'], headless: true}
 )
 
 await pAll(
