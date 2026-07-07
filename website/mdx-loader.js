@@ -113,7 +113,7 @@ const options = {
     [remarkMdxFrontmatter, {name: 'matter'}],
     remarkStripBadges,
     remarkSqueezeParagraphs,
-    [remarkToc, {maxDepth: 3}]
+    [remarkToc, {maxDepth: 3, heading: 'toc|table[ -]of[ -]contents?|目录'}]
   ]
 }
 
