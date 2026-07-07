@@ -1,62 +1,57 @@
 [![MDX][githubusercontent-logo]][website]
 
-# Markdown for the component era
+# 面向组件时代的 Markdown
 
-[![Build][build-badge]][build]
-[![Coverage][coverage-badge]][coverage]
-[![Sponsors][sponsors-badge]][collective]
-[![Backers][backers-badge]][collective]
-[![Chat][chat-badge]][chat]
+[![构建][build-badge]][build]
+[![覆盖率][coverage-badge]][coverage]
+[![赞助者][sponsors-badge]][collective]
+[![支持者][backers-badge]][collective]
+[![讨论][chat-badge]][chat]
 
-[MDX][website] is an authorable format that lets you seamlessly write JSX in
-your markdown documents.
-You can import components, such as interactive charts or alerts, and embed them
-within your content.
-This makes writing long-form content with components a blast.
-🚀
+[MDX][website] 是一种可创作的格式，让你可以在 Markdown 文档中无缝地编写 JSX。
+你可以导入组件（如交互式图表或提示框），并将它们嵌入到内容中。
+这让使用组件编写长篇内容变得非常轻松。🚀
 
 ```mdx
 import {Chart} from './snowfall.js'
 export const year = 2013
 
-# Last year’s snowfall
+# 去年的降雪量
 
-In {year}, the snowfall was above average.
-It was followed by a warm spring which caused
-flood conditions in many of the nearby rivers.
+在 {year} 年，降雪量高于平均水平。
+随后迎来了温暖的春天，导致附近许多河流
+出现了洪水泛滥的情况。
 
 <Chart year={year} color="#fcb32c" />
 ```
 
-See [§ What is MDX](https://mdxjs.com/docs/what-is-mdx/) for more info on the
-format.
-See [§ Playground](https://mdxjs.com/playground/) to try it out.
+有关格式的更多信息，请参见[§ 什么是 MDX](https://mdxjs.com/docs/what-is-mdx/)。
+要在线试用，请参见[§ Playground](https://mdxjs.com/playground/)。
 
-## What is this?
+## 这是什么？
 
-This GitHub repository contains several packages for compiling the MDX format to
-JavaScript, integrating with bundlers such as webpack and Rollup, and for using
-it with frameworks such as React, Preact, and Vue.
+这个 GitHub 仓库包含多个包，用于将 MDX 格式编译为
+JavaScript，与 webpack 和 Rollup 等打包器集成，以及与
+React、Preact 和 Vue 等框架一起使用。
 
-See [§ Getting started](https://mdxjs.com/getting-started/) for how to
-integrate MDX into your project.
+有关如何将 MDX 集成到你的项目中，请参见
+[§ 快速开始](https://mdxjs.com/getting-started/)。
 
-## Security
+## 安全
 
-See [§ Security][security] on our site for information.
+请参见我们网站上的[§ 安全][security]了解相关信息。
 
-## Contribute
+## 贡献
 
-See [§ Contribute][contribute] on our site for ways to get started.
-See [§ Support][support] for ways to get help.
+请参见我们网站上的[§ 贡献][contribute]了解如何参与。
+请参见[§ 支持][support]了解如何获取帮助。
 
-This project has a [code of conduct][coc].
-By interacting with this repository, organization, or community you agree to
-abide by its terms.
+本项目有一份[行为准则][coc]。
+通过与本仓库、组织或社区互动，即表示你同意遵守其条款。
 
-## Sponsor
+## 赞助
 
-See [§ Sponsor][sponsor] on our site for how to help financially.
+请参见我们网站上的[§ 赞助][sponsor]了解如何提供财务支持。
 
 <table>
 <tr valign="middle">
@@ -118,15 +113,15 @@ See [§ Sponsor][sponsor] on our site for how to help financially.
 <tr valign="middle">
 <td width="100%" align="center" colspan="8">
   <br>
-  <a href="https://opencollective.com/unified"><strong>You?</strong></a>
+  <a href="https://opencollective.com/unified"><strong>你？</strong></a>
   <br><br>
 </td>
 </tr>
 </table>
 
-## License
+## 许可证
 
-[MIT][] © Compositor and [Vercel][]
+[MIT][] © Compositor 和 [Vercel][]
 
 [backers-badge]: https://opencollective.com/unified/backers/badge.svg
 
