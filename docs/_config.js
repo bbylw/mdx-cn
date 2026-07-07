@@ -1,6 +1,6 @@
 const site = new URL('https://mdx.ndjp.net')
 const git = new URL('../', import.meta.url)
-const gh = new URL('https://github.com/bbylw/mdx-cn/')
+const gh = new URL('https://github.com/mdx-js/mdx/')
 
 export const config = {
   author: 'MDX 贡献者',

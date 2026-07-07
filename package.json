@@ -3,8 +3,8 @@
   "name": "monorepo",
   "license": "MIT",
   "homepage": "https://mdx.ndjp.net",
-  "repository": "bbylw/mdx-cn",
-  "bugs": "https://github.com/bbylw/mdx-cn/issues",
+  "repository": "mdx-js/mdx",
+  "bugs": "https://github.com/mdx-js/mdx/issues",
   "funding": {
     "type": "opencollective",
     "url": "https://opencollective.com/unified"
