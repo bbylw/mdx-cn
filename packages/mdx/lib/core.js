@@ -168,7 +168,7 @@ export function createProcessor(options) {
       unreachable(
         'Unexpected removed option `' +
           key +
-          '`; see <https://mdxjs.com/migrating/v2/> on how to migrate'
+          '`; see <https://mdx.ndjp.net/migrating/v2/> on how to migrate'
       )
     }
   }
@@ -190,7 +190,7 @@ export function createProcessor(options) {
   ) {
     warned = true
     console.warn(
-      "Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource`; see <https://mdxjs.com/migrating/v3/> on how to migrate"
+      "Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource`; see <https://mdx.ndjp.net/migrating/v3/> on how to migrate"
     )
   }
 

@@ -1222,7 +1222,7 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -1240,7 +1240,7 @@ abide by its terms.
 
 [hast]: https://github.com/syntax-tree/hast
 
-[integrations]: https://mdxjs.com/getting-started/#integrations
+[integrations]: https://mdx.ndjp.net/docs/getting-started/#integrations
 
 [mdast]: https://github.com/syntax-tree/mdast
 
@@ -1250,7 +1250,7 @@ abide by its terms.
 
 [mdast-util-to-hast]: https://github.com/syntax-tree/mdast-util-to-hast
 
-[mdx-syntax]: https://mdxjs.com/docs/what-is-mdx/#mdx-syntax
+[mdx-syntax]: https://mdx.ndjp.net/docs/what-is-mdx/#mdx-syntax
 
 [mdx-types-components]: https://github.com/DefinitelyTyped/DefinitelyTyped/blob/HEAD/types/mdx/types.d.ts#L65
 
@@ -1278,7 +1278,7 @@ abide by its terms.
 
 [remark-rehype-options]: https://github.com/remarkjs/remark-rehype#options
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
 [size]: https://bundlejs.com/?q=@mdx-js/mdx
 
@@ -1288,9 +1288,9 @@ abide by its terms.
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
-[types]: https://mdxjs.com/getting-started/#types
+[types]: https://mdx.ndjp.net/docs/getting-started/#types
 
 [typescript]: https://www.typescriptlang.org
 
@@ -1302,7 +1302,7 @@ abide by its terms.
 
 [use]: #use
 
-[using-mdx]: https://mdxjs.com/docs/using-mdx/
+[using-mdx]: https://mdx.ndjp.net/docs/using-mdx/
 
 [vercel]: https://vercel.com
 

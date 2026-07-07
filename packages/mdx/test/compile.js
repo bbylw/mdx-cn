@@ -50,7 +50,7 @@ test('@mdx-js/mdx: compile', async function (t) {
       )
 
       assert.deepEqual(messages, [
-        "Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource`; see <https://mdxjs.com/migrating/v3/> on how to migrate"
+        "Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource`; see <https://mdx.ndjp.net/migrating/v3/> on how to migrate"
       ])
 
       console.warn = warn

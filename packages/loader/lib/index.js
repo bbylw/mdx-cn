@@ -63,7 +63,7 @@ export function loader(value, callback) {
   if ('renderer' in config) {
     callback(
       new Error(
-        '`options.renderer` is no longer supported. Please see <https://mdxjs.com/migrating/v2/> for more information'
+        '`options.renderer` is no longer supported. Please see <https://mdx.ndjp.net/migrating/v2/> for more information'
       )
     )
     return

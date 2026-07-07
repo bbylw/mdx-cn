@@ -275,7 +275,7 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -289,13 +289,13 @@ abide by its terms.
 
 [esmsh]: https://esm.sh
 
-[integrations]: https://mdxjs.com/getting-started/#integrations
+[integrations]: https://mdx.ndjp.net/docs/getting-started/#integrations
 
 [mdast-util-from-markdown]: https://github.com/syntax-tree/mdast-util-from-markdown
 
 [mdast-util-mdx]: https://github.com/syntax-tree/mdast-util-mdx
 
-[mdx]: https://mdxjs.com/packages/mdx/
+[mdx]: https://mdx.ndjp.net/packages/mdx/
 
 [mit]: https://github.com/mdx-js/mdx/blob/main/packages/remark-mdx/license
 
@@ -305,7 +305,7 @@ abide by its terms.
 
 [remark-rehype]: https://github.com/remarkjs/remark-rehype
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
 [size]: https://bundlephobia.com/result?p=remark-mdx
 
@@ -313,7 +313,7 @@ abide by its terms.
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
 [typescript]: https://www.typescriptlang.org
 

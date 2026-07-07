@@ -190,7 +190,7 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -210,7 +210,7 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
 [size]: https://bundlejs.com/?q=@mdx-js/vue
 
@@ -218,12 +218,12 @@ abide by its terms.
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[start-vue]: https://mdxjs.com/getting-started/#vue
+[start-vue]: https://mdx.ndjp.net/docs/getting-started/#vue
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
 [typescript]: https://www.typescriptlang.org
 
-[use-provider]: https://mdxjs.com/docs/using-mdx/#mdx-provider
+[use-provider]: https://mdx.ndjp.net/docs/using-mdx/#mdx-provider
 
 [vercel]: https://vercel.com

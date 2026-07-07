@@ -198,9 +198,9 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[compile-options]: https://mdxjs.com/packages/mdx/#compileoptions
+[compile-options]: https://mdx.ndjp.net/packages/mdx/#compileoptions
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -212,7 +212,7 @@ abide by its terms.
 
 [esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
 
-[integrations]: https://mdxjs.com/getting-started/#integrations
+[integrations]: https://mdx.ndjp.net/docs/getting-started/#integrations
 
 [mit]: https://github.com/mdx-js/mdx/blob/main/packages/node-loader/license
 
@@ -220,12 +220,12 @@ abide by its terms.
 
 [npm]: https://docs.npmjs.com/cli/install
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
-[types]: https://mdxjs.com/getting-started/#types
+[types]: https://mdx.ndjp.net/docs/getting-started/#types
 
 [typescript]: https://www.typescriptlang.org

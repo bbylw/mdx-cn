@@ -25,8 +25,8 @@ export const year = 2013
 <Chart year={year} color="#fcb32c" />
 ```
 
-有关格式的更多信息，请参见[§ 什么是 MDX](https://mdxjs.com/docs/what-is-mdx/)。
-要在线试用，请参见[§ Playground](https://mdxjs.com/playground/)。
+有关格式的更多信息，请参见[§ 什么是 MDX](https://mdx.ndjp.net/docs/what-is-mdx/)。
+要在线试用，请参见[§ Playground](https://mdx.ndjp.net/playground/)。
 
 ## 这是什么？
 
@@ -35,7 +35,7 @@ JavaScript，与 webpack 和 Rollup 等打包器集成，以及与
 React、Preact 和 Vue 等框架一起使用。
 
 有关如何将 MDX 集成到你的项目中，请参见
-[§ 快速开始](https://mdxjs.com/getting-started/)。
+[§ 快速开始](https://mdx.ndjp.net/docs/getting-started/)。
 
 ## 安全
 
@@ -137,7 +137,7 @@ React、Preact 和 Vue 等框架一起使用。
 
 [collective]: https://opencollective.com/unified
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -147,14 +147,14 @@ React、Preact 和 Vue 等框架一起使用。
 
 [mit]: license
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
-[sponsor]: https://mdxjs.com/community/sponsor/
+[sponsor]: https://mdx.ndjp.net/community/sponsor/
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
 [vercel]: https://vercel.com
 
-[website]: https://mdxjs.com
+[website]: https://mdx.ndjp.net

@@ -228,7 +228,7 @@ abide by its terms.
 
 [collective]: https://opencollective.com/unified
 
-[contribute]: https://mdxjs.com/community/contribute/
+[contribute]: https://mdx.ndjp.net/community/contribute/
 
 [coverage]: https://codecov.io/github/mdx-js/mdx
 
@@ -250,7 +250,7 @@ abide by its terms.
 
 [preact-component-children]: https://github.com/preactjs/preact/blob/main/src/index.d.ts#L53
 
-[security]: https://mdxjs.com/getting-started/#security
+[security]: https://mdx.ndjp.net/docs/getting-started/#security
 
 [size]: https://bundlejs.com/?q=@mdx-js/preact
 
@@ -258,12 +258,12 @@ abide by its terms.
 
 [sponsors-badge]: https://opencollective.com/unified/sponsors/badge.svg
 
-[start-preact]: https://mdxjs.com/getting-started/#preact
+[start-preact]: https://mdx.ndjp.net/docs/getting-started/#preact
 
-[support]: https://mdxjs.com/community/support/
+[support]: https://mdx.ndjp.net/community/support/
 
 [typescript]: https://www.typescriptlang.org
 
-[use-provider]: https://mdxjs.com/docs/using-mdx/#mdx-provider
+[use-provider]: https://mdx.ndjp.net/docs/using-mdx/#mdx-provider
 
 [vercel]: https://vercel.com
