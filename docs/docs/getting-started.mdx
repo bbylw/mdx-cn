@@ -1,0 +1,990 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2021-10-05')
+}
+export const navSortSelf = 2
+
+# 快速开始
+
+本文解释了如何将 MDX 集成到你的项目中。
+它展示了如何使用你选择的打包器和 JSX 运行时。 {/* more */}
+要了解 MDX 格式的工作原理，
+我们建议你先阅读[§ 什么是 MDX][what]。
+如果你已经配置好并准备使用 MDX，请参见[§ 使用 MDX][use]。
+
+## 目录
+
+* [前置条件](#prerequisites)
+* [快速入门](#quick-start)
+  * [打包器](#bundler)
+  * [JSX](#jsx)
+  * [编辑器](#editor)
+  * [类型](#types)
+  * [安全](#security)
+* [集成](#integrations)
+  * [打包器](#bundlers)
+  * [构建系统](#build-systems)
+  * [代码检查工具](#linters)
+  * [编译器](#compilers)
+  * [站点生成器](#site-generators)
+  * [JSX 运行时](#jsx-runtimes)
+  * [JavaScript 引擎](#javascript-engines)
+* [延伸阅读](#further-reading)
+
+## 前置条件
+
+MDX 依赖 JSX，
+因此你的项目也需要支持 JSX。
+任何 JSX 运行时（React、Preact、Vue 等）都可以。
+请注意，我们会为你将 JSX 编译为 JavaScript，所以你不需要自行配置。
+
+所有 `@mdx-js/*` 包都是用现代 JavaScript 编写的。
+需要 [Node.js][node-js] 16 或更高版本才能使用。
+我们的包也是[仅支持 ESM][github-gist-esm] 的。
+
+<Note type="info">
+  **注意**：使用 Rust 而非 Node.js？
+  试试 [`mdxjs-rs`][mdxjs-rs]！
+</Note>
+
+## 快速入门
+
+### 打包器
+
+MDX 是一种编译为 JavaScript 的语言。
+（我们也编译普通 Markdown 为 JavaScript。）
+最简单的入门方式是使用你的打包器的集成（如果你有的话）：
+
+* 如果你使用 **esbuild**（或 Bun），
+  安装并配置 [`@mdx-js/esbuild`][mdx-esbuild]
+* 如果你使用 **Rollup**（或 Vite），
+  安装并配置 [`@mdx-js/rollup`][mdx-rollup]
+* 如果你使用 **webpack**（或 Next.js），
+  安装并配置 [`@mdx-js/loader`][mdx-loader]
+
+你也可以在不用打包器的情况下使用 MDX：
+
+* 你可以在 **Node.js** 中使用
+  [`@mdx-js/node-loader`][mdx-node-loader] 导入 MDX 文件
+* 你可以使用我们的核心编译器 [`@mdx-js/mdx`][mdx-mdx] 来编译 MDX 文件
+* 你可以使用我们的核心编译器 [`@mdx-js/mdx`][mdx-mdx] 来
+  [执行][api-evaluate]（编译*并运行*）MDX 文件
+
+有关这些工具的更多信息，
+请参见它们的专门章节：
+[¶ Next.js][site-generator-next]、
+[¶ Node.js][js-engine-node]、
+[¶ Rollup][bundler-rollup]、
+[¶ Vite][build-system-vite]、
+[¶ esbuild][bundler-esbuild] 和
+[¶ webpack][bundler-webpack]。
+
+### JSX
+
+现在你已经设置了集成或 `@mdx-js/mdx` 本身，
+是时候配置你的 JSX 运行时了。
+
+* 如果你使用 **React**，
+  这是默认的；
+  可选安装和配置 [`@mdx-js/react`][mdx-react]
+* 如果你使用 **Preact**，
+  将 [`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+  `'preact'`；
+  可选安装和配置 [`@mdx-js/preact`][mdx-preact]
+* 如果你使用 **Svelte**，
+  安装 [`svelte-jsx`][svelte-jsx]，
+  并将 [`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+  `'svelte-jsx'`
+* 如果你使用 **Vue**，
+  将 [`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+  `'vue'`；
+  可选安装和配置 [`@mdx-js/vue`][mdx-vue]
+* 如果你使用 **Solid**，
+  将 [`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+  `'solid-js/h'`
+* 如果你使用 **Emotion**，
+  将 [`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+  `'@emotion/react'`
+* 如果你使用 **Theme UI**，
+  安装和配置 [`@mdx-js/react`][mdx-react]，
+  然后用 `<ThemeProvider />` 包裹你的 MDX 内容
+
+其他 JSX 运行时通过设置
+[`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 来支持。
+
+有关这些工具的更多信息，
+请参见它们的专门章节：
+[¶ Emotion][jsx-runtime-emotion]、
+[¶ Preact][jsx-runtime-preact]、
+[¶ React][jsx-runtime-react]、
+[¶ Solid][jsx-runtime-solid]、
+[¶ Svelte][jsx-runtime-svelte]、
+[¶ Theme UI][jsx-runtime-theme-ui] 和
+[¶ Vue][jsx-runtime-vue]。
+
+### 编辑器
+
+你可以通过在编辑器中添加 MDX 支持来提升使用体验：
+
+* 如果你使用 **VS Code**，
+  试试 [`mdx-js/mdx-analyzer`][mdx-analyzer]
+* 如果你使用 **Vim**，
+  试试 [`jxnblk/vim-mdx-js`][vim-mdx-js]
+* 如果你使用 **Sublime Text**，
+  试试 [`jonsuh/mdx-sublime`][mdx-sublime]
+* 如果你使用 **JetBrains IntelliJ/WebStorm**，
+  试试 [`JetBrains/mdx-intellij-plugin`][mdx-intellij-plugin]
+
+为我们的 VS Code 扩展提供语法高亮、并在 GitHub 上用于高亮代码块的语法高亮
+维护于
+[`wooorm/markdown-tm-language`][markdown-tm-language]。
+
+### 类型
+
+<details>
+  <summary>展开类型化导入的示例</summary>
+
+  首先安装包：
+
+  ```sh
+  npm install @types/mdx
+  ```
+
+  …TypeScript 应该会自动识别：
+
+  ```js twoslash path="example.js"
+  // @filename: types.d.ts
+  import type {} from 'mdx'
+  // @filename: example.js
+  // ---cut---
+  import Post from './post.mdx' // `Post` 现在有类型了。
+  ```
+</details>
+
+我们的包使用 [TypeScript][] 进行类型标注。
+要让类型工作，
+`JSX` 命名空间必须被类型化。
+这通过安装和使用你框架的类型来完成，
+例如 [`@types/react`][definitely-typed-react]，
+然后增强 `mdx/types.js` 模块。
+
+```ts twoslash path="example.ts"
+import * as React from 'react'
+
+declare module 'mdx/types.js' {
+  export import JSX = React.JSX
+}
+```
+
+要为导入的 `.mdx`、`.md` 等启用类型，
+安装并使用 [`@types/mdx`][definitely-typed-mdx]。
+这个包还导出了几个有用的类型，
+例如 `MDXComponents`，它代表 `components` 属性。
+你可以这样导入它们：
+
+```ts twoslash path="example.ts"
+import type {MDXComponents} from 'mdx/types.js'
+```
+
+### 安全
+
+MDX 是一种编程语言。
+如果你信任你的作者，
+那没问题。
+如果你不信任，
+那就不安全。
+
+不要让互联网上的随机人员编写 MDX。
+如果你这样做，
+你可能需要考虑使用带 `sandbox` 的 `<iframe>`，
+但安全很难，
+而且这似乎不是 100% 安全的。
+对于 Node.js，
+[vm2][] 听起来不错。
+但你可能还需要使用 Docker 或类似工具对整个操作系统进行沙箱化，
+执行速率限制，
+并确保进程在耗时过长时可以被终止。
+
+## 集成
+
+### 打包器
+
+#### esbuild
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import mdx from '@mdx-js/esbuild'
+  import esbuild from 'esbuild'
+
+  await esbuild.build({
+    entryPoints: ['index.mdx'],
+    format: 'esm',
+    outfile: 'output.js',
+    plugins: [mdx({/* jsxImportSource: …, otherOptions… */})]
+  })
+  ```
+</details>
+
+我们支持 [esbuild][]。
+安装并配置 esbuild 插件 [`@mdx-js/esbuild`][mdx-esbuild]。
+根据你使用的运行时（React、Preact、Vue 等）[配置你的 JSX 运行时][jsx]。
+
+要使用比你用户支持的更现代的 JavaScript 特性，
+[配置 esbuild 的 `target`][esbuild-target]。
+
+另见 [¶ Bun][javascript-engines-bun]，
+你可能正在使用它，
+获取更多信息。
+
+#### Rollup
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="rollup.config.js"
+  /**
+   * @import {RollupOptions} from 'rollup'
+   */
+
+  import mdx from '@mdx-js/rollup'
+  import {babel} from '@rollup/plugin-babel'
+
+  /** @type {RollupOptions} */
+  const config = {
+    // …
+    plugins: [
+      // …
+      mdx({/* jsxImportSource: …, otherOptions… */}),
+      // Babel 是可选的：
+      babel({
+        // Also run on what used to be `.mdx` (but is now JS):
+        extensions: ['.js', '.jsx', '.cjs', '.mjs', '.md', '.mdx'],
+        // Other options…
+      })
+    ]
+  }
+
+  export default config
+  ```
+</details>
+
+我们支持 [Rollup][]。
+安装并配置 Rollup 插件 [`@mdx-js/rollup`][mdx-rollup]。
+根据你使用的运行时（React、Preact、Vue 等）[配置你的 JSX 运行时][jsx]。
+
+要使用比你用户支持的更现代的 JavaScript 特性，
+[安装并配置 `@rollup/plugin-babel`][mdx-rollup-babel]。
+
+另见 [¶ Vite][build-system-vite]，
+如果你通过它使用 Rollup，
+获取更多信息。
+
+#### Webpack
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="webpack.config.js"
+  /**
+   * @import {Options} from '@mdx-js/loader'
+   * @import {Configuration} from 'webpack'
+   */
+
+  /** @type {Configuration} */
+  const webpackConfig = {
+    module: {
+      // …
+      rules: [
+        // …
+        {
+          test: /\.mdx?$/,
+          use: [
+            // Babel 是可选的：
+            {loader: 'babel-loader', options: {}},
+            {
+              loader: '@mdx-js/loader',
+              /** @type {Options} */
+              options: {/* jsxImportSource: …, otherOptions… */}
+            }
+          ]
+        }
+      ]
+    }
+  }
+
+  export default webpackConfig
+  ```
+</details>
+
+我们支持 [webpack][]。
+安装并配置 webpack loader [`@mdx-js/loader`][mdx-loader]。
+根据你使用的运行时（React、Preact、Vue 等）[配置你的 JSX 运行时][jsx]。
+
+要使用比你用户支持的更现代的 JavaScript 特性，
+[安装并配置 `babel-loader`][mdx-loader-babel]。
+
+另见 [¶ Next.js][site-generator-next]，
+如果你通过它使用 webpack，
+获取更多信息。
+
+### 构建系统
+
+#### Vite
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="vite.config.js"
+  import mdx from '@mdx-js/rollup'
+  import {defineConfig} from 'vite'
+
+  const viteConfig = defineConfig({
+    plugins: [
+      mdx(/* jsxImportSource: …, otherOptions… */)
+    ]
+  })
+
+  export default viteConfig
+  ```
+</details>
+
+我们支持 [Vite][]。
+安装并配置 Rollup 插件 [`@mdx-js/rollup`][mdx-rollup]。
+根据你使用的运行时（React、Preact、Vue 等）[配置你的 JSX 运行时][jsx]。
+
+要使用比你用户支持的更现代的 JavaScript 特性，
+[配置 Vite 的 `build.target`][vite-build-target]。
+
+<Note type="info">
+  **注意**：如果你同时使用 `@vitejs/plugin-react`，
+  你必须强制 `@mdx-js/rollup` 在它之前的 `pre` 阶段运行：
+
+  ```js twoslash path="vite.config.js"
+  import mdx from '@mdx-js/rollup'
+  import react from '@vitejs/plugin-react'
+  import {defineConfig} from 'vite'
+  // ---cut---
+  // …
+  const viteConfig = defineConfig({
+    plugins: [
+      {enforce: 'pre', ...mdx({/* jsxImportSource: …, otherOptions… */})},
+      react({include: /\.(jsx|js|mdx|md|tsx|ts)$/})
+    ]
+  })
+  // …
+  ```
+</Note>
+
+另见 Vite 中使用的 [¶ Rollup][bundler-rollup]，如果你使用 Vue 请参见
+[¶ Vue][jsx-runtime-vue]，
+获取更多信息。
+
+### 代码检查工具
+
+#### ESLint
+
+你可以使用 [ESLint][] 和 [`eslint-mdx`][eslint-mdx] 来检查你的 MDX 代码。
+
+#### mdxlint
+
+你可以使用 [`remark-lint`][remark-lint] 和其他
+[remark 插件][]通过 [`mdxlint`][mdxlint] 来检查你的 MDX 代码。
+
+### 编译器
+
+#### Babel
+
+<details>
+  <summary>展开插件和示例用法</summary>
+
+  此插件：
+
+  ```js twoslash path="plugin.js"
+  /**
+   * @import {ParseResult, ParserOptions} from '@babel/parser'
+   * @import {File} from '@babel/types'
+   * @import {Program} from 'estree'
+   * @import {Plugin} from 'unified'
+   */
+
+  import parser from '@babel/parser'
+  import {compileSync} from '@mdx-js/mdx'
+  import estreeToBabel from 'estree-to-babel'
+
+  /**
+   * Plugin that tells Babel to use a different parser.
+   */
+  export function babelPluginSyntaxMdx() {
+    return {parserOverride: babelParserWithMdx}
+  }
+
+  /**
+   * Parser that handles MDX with `@mdx-js/mdx` and passes other things through
+   * to the normal Babel parser.
+   *
+   * @param {string} value
+   * @param {ParserOptions} options
+   * @returns {ParseResult<File>}
+   */
+  function babelParserWithMdx(value, options) {
+    /** @type {string | undefined} */
+    // @ts-expect-error: babel changed the casing at some point and the types are out of date.
+    const filename = options.sourceFilename || options.sourceFileName
+
+    if (filename && /\.mdx?$/.test(filename)) {
+      // Babel does not support async parsers, unfortunately.
+      const file = compileSync(
+        {value, path: options.sourceFilename},
+        {recmaPlugins: [recmaBabel] /* jsxImportSource: …, otherOptions… */}
+      )
+      return /** @type {ParseResult<File>} */ (file.result)
+    }
+
+    return parser.parse(value, options)
+  }
+
+  /**
+   * A "recma" plugin is a unified plugin that runs on the estree (used by
+   * `@mdx-js/mdx` and much of the JS ecosystem but not Babel).
+   * This plugin defines `'estree-to-babel'` as the compiler,
+   * which means that the resulting Babel tree is given back by `compileSync`.
+   *
+   * @type {Plugin<[], Program, unknown>}
+   */
+  function recmaBabel() {
+    // @ts-expect-error: `Program` is similar enough to a unist node.
+    this.compiler = compiler
+
+    /**
+     * @param {Program} tree
+     * @returns {unknown}
+     */
+    function compiler(tree) {
+      // @ts-expect-error: TS2349: This expression *is* callable, `estreeToBabel` types are wrong.
+      return estreeToBabel(tree)
+    }
+  }
+  ```
+
+  …可以像这样与 Babel API 一起使用：
+
+  ```js twoslash path="example.js"
+  /// <reference types="node" />
+  // ---cut---
+  // @filename: plugin.js
+  /**
+   * @import {ParseResult, ParserOptions} from '@babel/parser'
+   * @import {File} from '@babel/types'
+   * @import {Program} from 'estree'
+   * @import {Plugin} from 'unified'
+   */
+
+  import parser from '@babel/parser'
+  import {compileSync} from '@mdx-js/mdx'
+  import estreeToBabel from 'estree-to-babel'
+
+  /**
+   * Plugin that tells Babel to use a different parser.
+   */
+  export function babelPluginSyntaxMdx() {
+    return {parserOverride: babelParserWithMdx}
+  }
+
+  /**
+   * Parser that handles MDX with `@mdx-js/mdx` and passes other things through
+   * to the normal Babel parser.
+   *
+   * @param {string} value
+   * @param {ParserOptions} options
+   * @returns {ParseResult<File>}
+   */
+  function babelParserWithMdx(value, options) {
+    /** @type {string | undefined} */
+    // @ts-expect-error: babel types are wrong.
+    const filename = options.sourceFilename || options.sourceFileName
+
+    if (filename && /\.mdx?$/.test(filename)) {
+      // Babel does not support async parsers, unfortunately.
+      const file = compileSync(
+        {value, path: options.sourceFilename},
+        {recmaPlugins: [recmaBabel] /* jsxImportSource: …, otherOptions… */}
+      )
+      return /** @type {ParseResult<File>} */ (file.result)
+    }
+
+    return parser.parse(value, options)
+  }
+
+  /**
+   * A "recma" plugin is a unified plugin that runs on the estree (used by
+   * `@mdx-js/mdx` and much of the JS ecosystem but not Babel).
+   * This plugin defines `'estree-to-babel'` as the compiler,
+   * which means that the resulting Babel tree is given back by `compileSync`.
+   *
+   * @type {Plugin<[], Program, unknown>}
+   */
+  function recmaBabel() {
+    // @ts-expect-error: `Program` is similar enough to a unist node.
+    this.compiler = compiler
+
+    /**
+     * @param {Program} tree
+     * @returns {unknown}
+     */
+    function compiler(tree) {
+      // @ts-expect-error: TS2349: This expression *is* callable, `estreeToBabel` types are wrong.
+      return estreeToBabel(tree)
+    }
+  }
+  // @filename: example.js
+  // ---cut---
+  import babel from '@babel/core'
+  import {babelPluginSyntaxMdx} from './plugin.js'
+
+  const document = '# Hello, world!'
+
+  // Note that a filename must be set for our plugin to know it's MDX instead of JS.
+  const result = await babel.transformAsync(document, {
+    filename: 'example.mdx',
+    plugins: [babelPluginSyntaxMdx]
+  })
+
+  console.log(result)
+  ```
+</details>
+
+你可能应该直接使用 Rollup 或 webpack 而不是直接使用 Babel，
+因为它们提供了更好的接口。
+可以在 Babel 中使用 `@mdx-js/mdx`，而且会快一些，
+因为它跳过了 `@mdx-js/mdx` 序列化和 Babel 解析（如果已经使用了 Babel 的话）。
+
+Babel 不支持其解析器的语法扩展（它有"语法"插件，
+但那些只是打开或关闭内部标志）。
+它确实支持设置不同的解析器。
+这反过来让我们选择是使用 `@mdx-js/mdx` 还是
+`@babel/parser`。
+
+### 站点生成器
+
+#### Astro
+
+[Astro][] 有自己的 MDX 集成。
+你可以通过 Astro CLI 添加集成：`npx astro add mdx`。
+
+这个基础设置让你可以将 Markdown、Astro 组件和 MDX 文件作为
+组件导入。
+参见 Astro 的[框架组件指南][astro-framework-components]了解
+如何在 MDX 文件中使用框架的组件。
+
+有关如何结合 Astro 和 MDX 的更多信息，
+请参见 [Astro 的 MDX 集成文档][astro-mdx]。
+
+#### Docusaurus
+
+[Docusaurus][] 默认支持 MDX。
+参见 [Docusaurus 的 MDX 和 React 指南][docusaurus-markdown-react]了解
+如何在 Docusaurus 中使用 MDX。
+
+#### Gatsby
+
+[Gatsby][] 有自己的插件来支持 MDX。
+参见 [`gatsby-plugin-mdx`][gatsby-plugin-mdx] 了解如何在 Gatsby 中使用 MDX。
+
+#### Next.js
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="next.config.js"
+  import nextMdx from '@next/mdx'
+
+  const withMdx = nextMdx({
+    // By default only the `.mdx` extension is supported.
+    extension: /\.mdx?$/,
+    options: {/* otherOptions… */}
+  })
+
+  const nextConfig = withMdx({
+    // Support MDX files as pages:
+    pageExtensions: ['md', 'mdx', 'tsx', 'ts', 'jsx', 'js'],
+  })
+
+  export default nextConfig
+  ```
+</details>
+
+[Next.js][next] 有自己的 MDX 集成。
+安装并配置 [`@next/mdx`][next-mdx]。
+
+不要使用 `providerImportSource` 和 `@mdx-js/react` 来注入组件。
+而是添加一个 `mdx-components.tsx`（在 `src/` 或 `/` 中）文件。
+参见 [`nextjs.org` 上的配置 MDX][next-configuring-mdx] 获取更多信息。
+
+#### Parcel
+
+[Parcel][] 有自己的插件来支持 MDX。
+参见 [`@parcel/transformer-mdx`][parcel-mdx]
+了解如何在 Parcel 中使用 MDX。
+
+<Note type="info">
+  **注意**：官方 Parcel 插件目前未维护。
+  对于有维护的替代方案，
+  试试 [`parcel-transformer-mdx`][parcel-transformer-mdx]。
+</Note>
+
+### JSX 运行时
+
+#### Emotion
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import {compile} from '@mdx-js/mdx'
+
+  const js = String(await compile('# hi', {jsxImportSource: '@emotion/react', /* otherOptions… */}))
+  ```
+</details>
+
+当
+[`ProcessorOptions` 中的 `jsxImportSource`][api-processor-options] 设置为
+`'@emotion/react'` 时支持 [Emotion][]。
+你可以可选地安装和配置 [`@mdx-js/react`][mdx-react] 来
+支持基于上下文的组件传递。
+
+另见 Emotion 中使用的 [¶ React][jsx-runtime-react]，
+以及你可能使用的 [¶ Rollup][bundler-rollup] 和 [¶ webpack][bundler-webpack]，
+获取更多信息。
+
+#### Ink
+
+<details>
+  <summary>展开示例</summary>
+
+  ```mdx path="example.mdx"
+  # Hi!
+  ```
+
+  ```js twoslash path="example.js"
+  // @filename: types.d.ts
+  import type {} from 'mdx'
+  // @filename: example.js
+  // @errors: 2769 -- something with Ink/twoslash/react getting different versions of React?
+  // ---cut---
+  import React from 'react'
+  import {Text, render} from 'ink'
+  import Content from './example.mdx' // Assumes an integration is used to compile MDX -> JS.
+
+  render(
+    React.createElement(Content, {
+      components: {
+        h1(properties) {
+          return React.createElement(Text, {bold: true, ...properties})
+        },
+        p: Text
+      }
+    })
+  )
+  ```
+
+  可以这样使用：
+
+  ```sh
+  node --loader=@mdx-js/node-loader example.js
+  ```
+</details>
+
+[Ink][] 使用 React JSX 运行时，
+所以请先设置好它。
+你需要将 HTML 元素替换为 Ink 的组件。
+参见 [§ 组件表][table-of-components] 了解它们是什么，以及 Ink 的
+文档了解可以用什么替换。
+
+另见 [¶ Node.js][js-engine-node] 和 [¶ React][jsx-runtime-react] 获取更多
+信息。
+
+#### Preact
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import {compile} from '@mdx-js/mdx'
+
+  const js = String(await compile('# hi', {jsxImportSource: 'preact', /* otherOptions… */}))
+  ```
+</details>
+
+当 [`ProcessorOptions` 中的
+`jsxImportSource`][api-processor-options] 设置为 `'preact'` 时支持 Preact。
+你可以可选地安装和配置 [`@mdx-js/preact`][mdx-preact] 来
+支持基于上下文的组件传递。
+
+另见你可能使用的 [¶ Rollup][bundler-rollup]、[¶ esbuild][bundler-esbuild] 和
+[¶ webpack][bundler-webpack]，
+获取更多信息。
+
+#### React
+
+默认支持 React。
+你可以可选地安装和配置 [`@mdx-js/react`][mdx-react] 来
+支持基于上下文的组件传递。
+
+另见你可能使用的 [¶ Rollup][bundler-rollup]、[¶ esbuild][bundler-esbuild] 和
+[¶ webpack][bundler-webpack]，
+获取更多信息。
+
+#### Theme UI
+
+[Theme UI][theme-ui] 有自己的插件来支持 MDX。
+参见 [`@theme-ui/mdx`][theme-ui-mdx] 了解如何在 Theme UI 中使用 MDX。
+
+#### Svelte
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import {compile} from '@mdx-js/mdx'
+
+  const js = String(await compile('# hi', {jsxImportSource: 'svelte-jsx', /* otherOptions… */}))
+  ```
+</details>
+
+当 [`ProcessorOptions` 中的
+`jsxImportSource`][api-processor-options] 设置为
+[`'svelte-jsx'`][svelte-jsx] 时支持 Svelte。
+
+另见你可能使用的 [¶ Rollup][bundler-rollup]、[¶ esbuild][bundler-esbuild] 和
+[¶ webpack][bundler-webpack]，
+获取更多信息。
+
+#### Vue
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import {compile} from '@mdx-js/mdx'
+
+  const js = String(await compile('# hi', {jsxImportSource: 'vue', /* otherOptions… */}))
+  ```
+</details>
+
+当 [`ProcessorOptions` 中的
+`jsxImportSource`][api-processor-options] 设置为 `'vue'` 时支持 Vue。
+你可以可选地安装和配置 [`@mdx-js/vue`][mdx-vue] 来
+支持基于上下文的组件传递。
+
+另见你可能使用的 [¶ Vite][build-system-vite]，
+获取更多信息。
+
+#### Solid
+
+<details>
+  <summary>展开示例</summary>
+
+  ```js twoslash path="example.js"
+  import {compile} from '@mdx-js/mdx'
+
+  const js = String(await compile('# hi', {jsxImportSource: 'solid-js/h', /* otherOptions… */}))
+  ```
+</details>
+
+当 [`ProcessorOptions` 中的
+`jsxImportSource`][api-processor-options] 设置为 `'solid-js/h'` 时支持 Solid。
+
+另见你可能使用的 [¶ Rollup][bundler-rollup] 和 [¶ Vite][build-system-vite]，
+获取更多信息。
+
+### JavaScript 引擎
+
+#### Node.js
+
+可以通过
+[`@mdx-js/node-loader`][mdx-node-loader] 在 Node 中导入 MDX 文件。
+参见其 readme 了解如何配置。
+
+#### Bun
+
+可以通过
+[`@mdx-js/esbuild`][mdx-esbuild] 在 [Bun][] 中导入 MDX 文件。
+
+<details>
+  <summary>展开示例</summary>
+
+  ```toml path="bunfig.toml"
+  preload = ["./bun-mdx.ts"]
+  ```
+
+  ```ts twoslash path="bun-mdx.ts"
+  /// <reference types="bun-types" />
+  // ---cut---
+  import mdx from '@mdx-js/esbuild'
+  import {type BunPlugin, plugin} from 'bun'
+
+  await plugin(mdx() as unknown as BunPlugin)
+  ```
+</details>
+
+## 延伸阅读
+
+* 如果你想在项目中使用 MDX 内容，
+  请参见[§ 使用 MDX][use]
+* 如果你在集成 MDX 时遇到错误，
+  请参见[§ MDX 故障排除][trouble] 或 [§ 支持][support]
+
+[api-evaluate]: /packages/mdx/#evaluatefile-options
+
+[api-processor-options]: /packages/mdx/#processoroptions
+
+[astro]: https://astro.build/
+
+[astro-framework-components]: https://docs.astro.build/en/core-concepts/framework-components/
+
+[astro-mdx]: https://docs.astro.build/en/guides/integrations-guide/mdx/
+
+[build-system-vite]: #vite
+
+[bun]: https://bun.sh
+
+[bundler-esbuild]: #esbuild
+
+[bundler-rollup]: #rollup
+
+[bundler-webpack]: #webpack
+
+[definitely-typed-mdx]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/mdx
+
+[definitely-typed-react]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/react
+
+[docusaurus]: https://docusaurus.io
+
+[docusaurus-markdown-react]: https://docusaurus.io/docs/next/markdown-features/react
+
+[emotion]: https://emotion.sh/docs/introduction
+
+[esbuild]: https://esbuild.github.io
+
+[esbuild-target]: https://esbuild.github.io/api/#target
+
+[eslint]: https://eslint.org
+
+[eslint-mdx]: https://github.com/mdx-js/eslint-mdx
+
+[gatsby]: https://www.gatsbyjs.com
+
+[gatsby-plugin-mdx]: https://www.gatsbyjs.com/plugins/gatsby-plugin-mdx/
+
+[github-gist-esm]: https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c
+
+[ink]: https://github.com/vadimdemedes/ink
+
+[javascript-engines-bun]: #bun
+
+[js-engine-node]: #nodejs
+
+[jsx]: #jsx
+
+[jsx-runtime-emotion]: #emotion
+
+[jsx-runtime-preact]: #preact
+
+[jsx-runtime-react]: #react
+
+[jsx-runtime-solid]: #solid
+
+[jsx-runtime-svelte]: #svelte
+
+[jsx-runtime-theme-ui]: #theme-ui
+
+[jsx-runtime-vue]: #vue
+
+[markdown-tm-language]: https://github.com/wooorm/markdown-tm-language
+
+[mdx-analyzer]: https://github.com/mdx-js/mdx-analyzer
+
+[mdx-esbuild]: /packages/esbuild/
+
+[mdx-intellij-plugin]: https://github.com/JetBrains/intellij-plugins/tree/master/mdx
+
+[mdx-loader]: /packages/loader/
+
+[mdx-loader-babel]: /packages/loader/#combine-with-babel
+
+[mdx-mdx]: /packages/mdx/
+
+[mdx-node-loader]: /packages/node-loader/
+
+[mdx-preact]: /packages/preact/
+
+[mdx-react]: /packages/react/
+
+[mdx-rollup]: /packages/rollup/
+
+[mdx-rollup-babel]: /packages/rollup/#combine-with-babel
+
+[mdx-sublime]: https://github.com/jonsuh/mdx-sublime
+
+[mdx-vue]: /packages/vue/
+
+[mdxjs-rs]: https://github.com/wooorm/mdxjs-rs
+
+[mdxlint]: https://github.com/remcohaszing/mdxlint
+
+[next]: https://nextjs.org
+
+[next-configuring-mdx]: https://nextjs.org/docs/pages/building-your-application/configuring/mdx
+
+[next-mdx]: https://github.com/vercel/next.js/tree/canary/packages/next-mdx
+
+[node-js]: https://nodejs.org
+
+[parcel]: https://parceljs.org
+
+[parcel-mdx]: https://parceljs.org/languages/mdx/
+
+[parcel-transformer-mdx]: https://github.com/EasyWebApp/Parcel-transformer-MDX
+
+[remark plugins]: https://github.com/remarkjs/remark/blob/main/doc/plugins.md
+
+[remark-lint]: https://github.com/remarkjs/remark-lint
+
+[rollup]: https://rollupjs.org
+
+[site-generator-next]: #nextjs
+
+[support]: /community/support/
+
+[svelte-jsx]: https://github.com/kenoxa/svelte-jsx
+
+[table-of-components]: /table-of-components/
+
+[theme-ui]: https://theme-ui.com
+
+[theme-ui-mdx]: https://theme-ui.com/mdx
+
+[trouble]: /docs/troubleshooting-mdx/
+
+[typescript]: https://www.typescriptlang.org
+
+[use]: /docs/using-mdx/
+
+[vim-mdx-js]: https://github.com/jxnblk/vim-mdx-js
+
+[vite]: https://vitejs.dev
+
+[vite-build-target]: https://vitejs.dev/guide/build.html#browser-compatibility
+
+[vm2]: https://github.com/patriksimek/vm2
+
+[webpack]: https://webpack.js.org
+
+[what]: /docs/what-is-mdx/

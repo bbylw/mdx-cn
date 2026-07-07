@@ -1,0 +1,81 @@
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2023-10-24'),
+  published: new Date('2023-10-24')
+}
+export const navExclude = true
+
+# 从 v2 迁移到 v3
+
+这次只有几个小的变更。
+对于大多数人来说，只需要更新 Node.js 和插件即可！
+
+## 目录
+
+* [更新 Node.js](#update-nodejs)
+* [更新插件](#update-plugins)
+* [向 `evaluate`、`run` 传递 `baseUrl`](#pass-baseurl-to-evaluate-run)
+* [使用自动 JSX 运行时](#use-the-automatic-jsx-runtime)
+* [用 `useMDXComponents` 替换 `MDXContext`、`withMDXComponents`](#replace-mdxcontext-withmdxcomponents-with-usemdxcomponents)
+* [用 `@mdx-js/node-loader` 替换 `@mdx-js/register`](#replace-mdx-jsregister-with-mdx-jsnode-loader)
+
+## 更新 Node.js
+
+如果你还在使用旧版 Node，是时候更新了。
+至少使用 Node 16。
+
+## 更新插件
+
+如果你使用 rehype 和 remark 插件：请更新。
+
+大多数插件在版本之间仍然可以正常工作。
+特别是如果你使用 TypeScript，类型中有一个破坏性的内部变更，
+现在已得到支持。
+解析器的工作方式也有一些小的内部变更，影响
+`remark-gfm` 和 `remark-math`。
+
+## 向 `evaluate`、`run` 传递 `baseUrl`
+
+如果你使用 `evaluate` 或 `run`（或 `outputFormat: 'function-body'`），你应该
+传递 `baseUrl` 选项。
+通常设置为 `import.meta.url`。
+
+如果 MDX 内容使用 `export` 语句、`import` 表达式/语句或
+`import.meta.url`，我们会编译为可工作的代码，但它需要知道
+代码在哪里运行：你需要传递你所在的位置。
+
+如果在 MDX 中使用这些功能而没有 `baseUrl`，将会收到运行时错误。
+
+如果你之前传递了 `useDynamicImport` 选项，请移除它，该行为
+现在是默认的。
+
+```tsx
+import * as runtime from 'react/jsx-runtime'
+
+const result = await run('# hi', {...runtime, baseUrl: import.meta.url})
+```
+
+## 使用自动 JSX 运行时
+
+如果你使用 classic 运行时，请切换到 automatic 运行时。
+Classic 仍然受支持，但如果你使用 classic JSX 运行时，现在会看到警告。
+
+Classic 运行时在其他地方仍然可能很好，但在 MDX 中会导致潜在问题。
+如果你指定了 `jsxRuntime: 'classic'`（以及 `pragma`、`pragmaFrag`、
+`pragmaImportSource`），考虑切换到 `automatic`。
+所有主要框架都支持 automatic 运行时。
+对 classic 运行时的支持可能会在下一个主版本中移除。
+
+## 用 `useMDXComponents` 替换 `MDXContext`、`withMDXComponents`
+
+如果你使用已废弃的符号 `MDXContext` 和 `withMDXComponents`，请使用
+`useMDXComponents` 代替。
+
+提醒：你可能不需要基于上下文的 `@mdx-js/react` 或
+`@mdx-js/preact` 包。
+
+## 用 `@mdx-js/node-loader` 替换 `@mdx-js/register`
+
+如果你使用已废弃的包 `@mdx-js/register`，请使用 `@mdx-js/node-loader` 代替。

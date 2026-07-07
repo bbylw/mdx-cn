@@ -1,0 +1,691 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2022-02-01')
+}
+export const navExclude = true
+
+<Note type="legacy">
+  **注意**：这是一篇旧的迁移指南。
+  请参见[§ 从 v2 迁移到 v3](/migrating/v3/)。
+  以下内容为历史目的而保留原样。
+</Note>
+
+# 从 v1 迁移到 v2
+
+## 目录
+
+* [ESM](#esm)
+* [更新 `@mdx-js/*` 包](#update-mdx-js-packages)
+  * [`@mdx-js/loader`](#mdx-jsloader)
+  * [`@mdx-js/react`、`@mdx-js/preact`、`@mdx-js/vue`](#mdx-jsreact-mdx-jspreact-mdx-jsvue)
+  * [`@mdx-js/mdx`](#mdx-jsmdx)
+  * [`@mdx-js/runtime`](#mdx-jsruntime)
+  * [`remark-mdx`](#remark-mdx)
+  * [`@mdx-js/vue-loader`](#mdx-jsvue-loader)
+  * [`@mdx-js/parcel-plugin-mdx`](#mdx-jsparcel-plugin-mdx)
+  * [其他包](#other-packages)
+* [更新 MDX 文件](#update-mdx-files)
+  * [JSX](#jsx)
+  * [表达式](#expressions)
+  * [ESM](#esm-1)
+  * [Markdown](#markdown)
+  * [GFM](#gfm)
+* [更新 MDX 内容](#update-mdx-content)
+
+## ESM
+
+升级到版本 2 时，你可能会遇到导入问题。
+我们的包现在仅支持 ESM。
+你必须使用 `import foo from 'foo'` 而不是
+`const foo = require('foo')` 来加载它们。
+请参见[§ MDX 故障排除中的 ¶ ESM][trouble-esm]。
+
+## 更新 `@mdx-js/*` 包
+
+升级一些 `mdx-js/*` 包时需要进行更改。
+在本节中，我们将讨论每个包所需的更改。
+如果你遇到问题，请参见[§ MDX 故障排除][trouble]
+了解常见错误及其解决方法。
+
+### `@mdx-js/loader`
+
+要更新我们的 webpack 加载器 `@mdx-js/loader`，请首先更新到最新版本的
+webpack 和 React。
+然后确保支持 ESM。
+[ESM 已在上面解释][esm]。
+如果你在 webpack 配置中使用 ESM 遇到问题，这里有一个
+与我们之前的 `@mdx-js/loader`（`1.6.22`）配合使用的示例：
+
+<details>
+  <summary>展开 ESM 中 `webpack.config.js` 的示例</summary>
+
+  ```tsx path="webpack.config.js"
+  import {fileURLToPath} from 'node:url'
+  import webpack from 'webpack'
+
+  const config = {
+    context: fileURLToPath(new URL('src/', import.meta.url)),
+    entry: ['./index.js'],
+    mode: 'none',
+    module: {
+      rules: [
+        {
+          test: /\.mdx?$/,
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {presets: ['@babel/preset-env', '@babel/preset-react']}
+            },
+            {
+              loader: '@mdx-js/loader',
+              /** @type {import('@mdx-js/loader').Options} */
+              options: {}
+            }
+          ]
+        }
+      ]
+    },
+    output: {
+      filename: 'bundle.js',
+      path: fileURLToPath(new URL('dest/', import.meta.url))
+    }
+  };
+
+  export default config
+  ```
+</details>
+
+然后安装 MDX 版本 2：
+
+```sh
+npm install @mdx-js/loader @mdx-js/react remark-gfm
+```
+
+你可以按以下方式更新代码：
+
+<div className="big-columns">
+  <div>
+    之前：
+
+    ```tsx path="webpack.config.js"
+    // …
+    {
+      test: /\.mdx?$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env',
+              '@babel/preset-react'
+            ]
+          }
+        },
+        {
+          loader: '@mdx-js/loader',
+          /** @type {import('@mdx-js/loader').Options} */
+          options: {}
+        }
+      ]
+    }
+    // …
+    ```
+  </div>
+
+  <div>
+    之后：
+
+    ```tsx path="webpack.config.js"
+    import remarkGfm from 'remark-gfm'
+
+    // …
+    {
+      test: /\.mdx?$/,
+      use: [
+        {
+          loader: 'babel-loader',
+          options: {
+            presets: [
+              '@babel/preset-env'
+            ]
+          }
+        },
+        {
+          loader: '@mdx-js/loader',
+          /** @type {import('@mdx-js/loader').Options} */
+          options: {
+            providerImportSource: '@mdx-js/react',
+            remarkPlugins: [remarkGfm]
+          }
+        }
+      ]
+    }
+    // …
+    ```
+  </div>
+</div>
+
+上述更改使 MDX 2 接近 MDX 1 的工作方式。
+你可以使其更简单：
+
+* [`babel-loader`][babel-loader] 是可选的。
+  它将现代 JavaScript 编译为你的用户支持的 JavaScript。
+  如果你不需要它，可以在 `@mdx-js/loader` 之前移除它
+* [`remark-gfm`][remark-gfm] 是可选的。
+  它添加了对自动链接字面量、脚注、删除线、表格和
+  任务列表的支持。
+  如果你不需要它们，可以卸载它，移除导入，并从
+  `options.remarkPlugins` 中移除它。
+  更多信息请参见[我们的 GFM 指南][guide-gfm]
+* [`@mdx-js/react`][mdx-react] 是可选的。
+  它添加了对基于上下文的组件传递的支持。
+  如果你不需要，可以卸载它并移除
+  `options.providerImportSource`。
+  更多信息请参见[§ 使用 MDX 中的 ¶ MDX provider][mdx-provider]
+
+`@mdx-js/loader` 现在通过配置支持 Preact 和其他 JSX 运行时。
+以 Preact 为例：
+
+```tsx path="webpack.config.js"
+// …
+{
+  loader: '@mdx-js/loader',
+  /** @type {import('@mdx-js/loader').Options} */
+  options: {
+    jsxImportSource: 'preact',
+    // 可选：移除以下行或安装 `@mdx-js/preact`。
+    providerImportSource: '@mdx-js/preact'
+  }
+}
+// …
+```
+
+更多信息请参见 [`@mdx-js/loader` 中的 § API][loader-api]。
+
+###### 变更
+
+加载器接受的选项已更改：
+
+* `renderer` 被 `jsxImportSource`、`providerImportSource` 和
+  其他选项取代。
+  更多信息请参见 [`@mdx-js/mdx` 中的 § API][mdx-api]
+* 其他选项之前未文档化但传递给了 `@mdx-js/mdx`。
+  如需要请参见下文的 `@mdx-js/mdx`
+
+更多信息请参见 [`@mdx-js/loader` 中的 § API][loader-api]。
+
+### `@mdx-js/react`、`@mdx-js/preact`、`@mdx-js/vue`
+
+要更新我们的框架集成，请首先更新到最新版本的
+React、Preact 或 Vue 3。
+然后确保支持 ESM。
+[ESM 已在上面解释][esm]。
+然后安装版本 2：
+
+```sh
+npm install @mdx-js/react # 如需要将 `react` 改为 `preact` 或 `vue`
+```
+
+注意，这些包现在只添加对基于上下文的组件传递的支持。
+如果你不需要，可以卸载它们。
+更多信息请参见[§ 使用 MDX 中的 ¶ MDX provider][mdx-provider]。
+
+###### 变更
+
+接口略有更改：
+
+* 命名导出 `mdx`（一个 `createElement` 函数）已移除。
+  你可以改用你的框架的函数：`React.createElement`、
+  `preact` 的 `h` 等。
+
+### `@mdx-js/mdx`
+
+要更新我们的核心编译器 `@mdx-js/mdx`，首先确保支持 ESM。
+[ESM 已在上面解释][esm]。
+然后安装版本 2：
+
+```sh
+npm install @mdx-js/mdx @mdx-js/react remark-gfm
+```
+
+你可以按以下方式更新代码：
+
+<div className="big-columns">
+  <div>
+    之前：
+
+    ```tsx path="old.js"
+    import mdx from '@mdx-js/mdx'
+
+    const result = await mdx('# hi')
+
+    console.log(result)
+    ```
+  </div>
+
+  <div>
+    之后：
+
+    ```tsx path="new.js"
+    import {compile} from '@mdx-js/mdx'
+    import remarkGfm from 'remark-gfm'
+
+    const result = await compile('# hi', {
+      providerImportSource: '@mdx-js/react',
+      remarkPlugins: [remarkGfm]
+    })
+
+    console.log(String(result))
+    ```
+  </div>
+</div>
+
+上述更改使 MDX 2 接近 MDX 1 的工作方式。
+你可以使其更简单：
+
+* [`remark-gfm`][remark-gfm] 是可选的。
+  它添加了对自动链接字面量、脚注、删除线、表格和
+  任务列表的支持。
+  如果你不需要它们，可以卸载它，移除导入，并从
+  `options.remarkPlugins` 中移除它。
+  更多信息请参见[我们的 GFM 指南][guide-gfm]
+* [`@mdx-js/react`][mdx-react] 是可选的。
+  它添加了对基于上下文的组件传递的支持。
+  如果你不需要，可以卸载它并移除
+  `options.providerImportSource`。
+  更多信息请参见[§ 使用 MDX 中的 ¶ MDX provider][mdx-provider]
+
+`@mdx-js/mdx` 现在通过配置支持 Preact 和其他 JSX 运行时。
+以 Preact 为例：
+
+```tsx path="new-preact.js"
+import {compile} from '@mdx-js/mdx'
+
+const result = await compile('# hi', {jsxImportSource: 'preact'})
+```
+
+更多信息请参见 [`@mdx-js/mdx` 中的 § API][mdx-api]
+
+###### 变更
+
+`@mdx-js/mdx` 的接口已更改：
+
+* 默认导出被命名导出 [`compile`][mdx-compile] 取代
+* 命名导出 `sync` 被 [`compileSync`][mdx-compilesync] 取代
+* 命名导出 `createCompiler` 被
+  [`createProcessor`][mdx-createprocessor] 取代
+* 命名导出 `createMdxAstCompiler` 已移除，请改用 `remark` 加
+  `remark-mdx`
+* `compile`、`compileSync` 的返回值现在是 [VFile][] 而不是
+  字符串
+* 有新的导出 [`evaluate`][mdx-evaluate]、
+  [`evaluateSync`][mdx-evaluatesync] 用于 eval（编译并运行）MDX
+
+版本 1 中的选项未文档化。
+如果你使用了它们：
+
+* `filepath` 被接受 VFile 或兼容对象作为第一个参数 `file` 取代
+* `compilers` 被 `recmaPlugins` 取代
+* `hastPlugins` 被 `rehypePlugins` 取代
+* `mdPlugins` 被 `options.remarkPlugins` 取代
+* `skipExport` 已移除，[`evaluate`][mdx-evaluate] 可以自动
+  完成此操作
+* `wrapExport` 已移除，请改用自定义 recma 插件
+* 有许多新选项来支持不同的 JSX 运行时、非 React JSX、
+  编译掉 JSX、source map、普通 Markdown，以及以其他方式更改 MDX 的
+  编译方式
+
+更多信息请参见 [`@mdx-js/mdx` 中的 § API][mdx-api]。
+
+### `@mdx-js/runtime`
+
+我们已废弃 `@mdx-js/runtime`。
+我们的核心编译器 `@mdx-js/mdx` 现在可以做同样的事情甚至更多。
+要更新，首先确保支持 ESM。
+[ESM 已在上面解释][esm]。
+还请确保你使用的是最新版本的 React。
+然后卸载 `@mdx-js/runtime` 并安装 `@mdx-js/mdx` 和 `@mdx-js/react`：
+
+```sh
+npm uninstall @mdx-js/runtime
+npm install @mdx-js/mdx @mdx-js/react
+```
+
+你可以按以下方式更新代码：
+
+<div className="big-columns">
+  <div>
+    之前：
+
+    ```tsx path="old.js"
+    import MDX from '@mdx-js/runtime'
+
+    const components = {/* … */}
+    const value = '# hi'
+
+    export default function () {
+      return <MDX components={components}>
+        {value}
+      </MDX>
+    }
+    ```
+  </div>
+
+  <div>
+    之后：
+
+    ```tsx path="new.js"
+    import * as runtime from 'react/jsx-runtime'
+    import * as provider from '@mdx-js/react'
+    import {evaluate} from '@mdx-js/mdx'
+
+    const components = {/* … */}
+    const value = '# hi'
+    const {default: Content} = await evaluate(value, {...provider, ...runtime})
+
+    export default function () {
+      return <Content components={components} />
+    }
+    ```
+  </div>
+</div>
+
+上述更改使 MDX 2 接近 MDX 1 的工作方式。
+你可以使其更简单：
+
+* [`@mdx-js/react`][mdx-react] 是可选的。
+  它添加了对基于上下文的组件传递的支持。
+  如果你不需要，可以卸载它并移除
+  `options.providerImportSource`。
+  更多信息请参见[§ 使用 MDX 中的 ¶ MDX provider][mdx-provider]
+
+`@mdx-js/mdx` 现在通过配置支持 Preact 和其他 JSX 运行时。
+以 Emotion 为例：
+
+```tsx path="new-emotion.js"
+// …
+import * as runtime from '@emotion/react/jsx-runtime'
+// …
+```
+
+更多信息请参见 [`@mdx-js/mdx` 中的 `evaluate`][mdx-evaluate]。
+
+###### 变更
+
+* 包 `@mdx-js/runtime` 被 `@mdx-js/mdx` 中的 [`evaluate`][mdx-evaluate]
+  取代
+* `evaluate` 支持任何 JSX 运行时，provider 是可选的
+* `evaluate` 产生一个 `MDXContent` 组件，就像导入和 MDX 文件
+  的工作方式一样
+* `evaluate` 支持被评估 MDX 中的 import 和 export
+
+更多信息请参见 [`@mdx-js/mdx` 中的 `evaluate`][mdx-evaluate]。
+
+### `remark-mdx`
+
+要更新我们的 remark 插件 `remark-mdx`，首先确保支持 ESM。
+[ESM 已在上面解释][esm]。
+然后安装版本 2：
+
+```sh
+npm install remark-mdx
+```
+
+更多信息请参见 [`remark-mdx` 中的 § 使用][remark-mdx-use]。
+
+### `@mdx-js/vue-loader`
+
+我们已废弃 `@mdx-js/vue-loader`。
+我们的主加载器 `@mdx-js/loader` 现在可以做同样的事情甚至更多。
+要更新，首先移除 `@mdx-js/vue-loader` 并升级到 Vue 3。
+然后，请参见[§ 快速开始中的 ¶ Vue](/docs/getting-started/#vue) 了解如何
+在 MDX 中使用 Vue。
+
+### `@mdx-js/parcel-plugin-mdx`
+
+我们已废弃 `@mdx-js/parcel-plugin-mdx`。
+Parcel 2 有自己的插件。
+要更新，首先移除 `@mdx-js/parcel-plugin-mdx` 并升级到 Parcel 2。
+然后，请参见[§ 快速开始中的 ¶ Parcel](/docs/getting-started/#parcel) 了解如何在
+MDX 中使用 Parcel。
+
+### 其他包
+
+我们移除了几个为我们做内部工作的包。
+这些包是：
+
+* `@mdx-js/util`
+  — 不再需要的内部辅助工具
+* `@mdx-js/test-util`
+  — 不再需要的测试辅助工具，`evaluate` 可以完成
+* `gatsby-theme-mdx`
+  — 不再需要的网站模板
+* `remark-mdx-remove-imports`、`babel-plugin-extract-import-names`
+  — 不再需要的转换，我们的编译器处理 import
+* `remark-mdx-remove-exports`、`babel-plugin-remove-export-keywords`
+  — 不再需要的转换，我们的编译器处理 export
+* `babel-plugin-html-attributes-to-jsx`
+  — 不再需要的转换，类似的工作由
+  [`hast-util-to-estree`](https://github.com/syntax-tree/hast-util-to-estree) 完成
+* `babel-plugin-apply-mdx-type-props`
+  — 由于新架构不再需要的转换
+* `create-mdx`
+  — 不再需要，我们建议用你喜欢的其他集成开始你的项目，*然后*再
+  添加 MDX
+
+## 更新 MDX 文件
+
+现在你已经更新了我们的包，可以更新你的 MDX 文件了。
+在版本 2 中，我们改进了 MDX 格式的语法。
+升级时，你可能会遇到错误。
+请仔细阅读这些错误消息，因为它们通常会解释
+发生了什么、在哪里发生以及如何修复。
+请参见[§ MDX 故障排除][trouble] 了解常见错误及其解决方法。
+
+### JSX
+
+让我们从 MDX 中 JSX 现在可以做的一些新事情开始。
+你不再需要在 JSX 和 Markdown 之间添加空行：
+
+```mdx chrome=no
+<hgroup>
+# This is a heading now
+</hgroup>
+```
+
+你现在可以缩进你的 JSX 和 Markdown：
+
+````mdx chrome=no
+<article>
+  <hgroup>
+    # This is a heading now, not code or plain text
+  </hgroup>
+  <section>
+    ```js
+    // if you do want code blocks, use fenced code
+    ```
+  </section>
+</article>
+````
+
+如果文本和标签在同一行，你可以在 JSX 内使用 Markdown "行内"语法但不能使用"块"：
+
+```mdx chrome=no
+<div># this is not a heading but *this* is emphasis</div>
+```
+
+同一行上的文本和标签不会产生块，因此也不会产生 `<p>`。
+在不同的行上，它们会产生：
+
+```mdx chrome=no
+<div>
+  This is a `p`.
+</div>
+```
+
+我们使用这个规则（是否在同一行）来区分。
+不是基于 HTML 中元素的语义。
+所以你*可以*构建不正确的 HTML（你不应该这样做）：
+
+```mdx chrome=no
+<h1 className="main">
+  Don't do this: it's a `p` in an `h1`
+</h1>
+
+<h1 className="main">Do this: an `h1` with `code`</h1>
+```
+
+如果文本和标签在同一行但对应的标签在不同行，则不可能包裹"块"：
+
+```mdx chrome=no
+Welcome! <a href="about.html">
+
+This is home of...
+
+# The Falcons!</a>
+```
+
+这是因为要解析 Markdown，我们首先必须将其划分为"块"。
+所以在这种情况下是两个段落和一个标题。
+在第一个段落中留下一个开始的 `a` 标签，在标题中留下一个孤立的结束 `a` 标签。
+
+我们还修复了几个 JSX 未被正确解析或处理甚至崩溃的情况。
+更多关于 MDX 中 JSX 的信息请参见[§ 什么是 MDX 中的 ¶ JSX][what-jsx]
+
+### 表达式
+
+你现在可以在 MDX 中使用表达式来包含 JavaScript。
+如果你只想使用字符串或 JSX 而不是 Markdown，你也可以将它们用作逃生舱：
+
+```mdx chrome=no
+{
+  <h1>
+    This just JSX, these *asterisks* have no meaning.
+  </h1>
+}
+
+This is just {'`text`'}, not code.
+```
+
+更多关于 MDX 中表达式的信息请参见
+[§ 什么是 MDX 中的 ¶ 表达式][what-expressions]
+
+### ESM
+
+你可以更轻松地在 MDX 中嵌入组件，因为允许空行：
+
+{/* 注意：使用 `language` 因为 VS Code 中的主题有 bug。*/}
+
+```mdx chrome=no
+export function Button(props) {
+  const style = {color: 'red'}
+
+  return <button style={style} {...props} />
+}
+```
+
+我们还修复了几个 `import` 和 `export` 未被正确解析或处理甚至崩溃的情况。
+更多关于 MDX 中 ESM 的信息请参见[§ 什么是 MDX 中的 ¶ ESM][what-esm]
+
+### Markdown
+
+我们关闭了一些在普通 Markdown 中允许的功能，以使 MDX
+不那么有歧义。
+更多关于 MDX 中 Markdown 及其差异的信息请参见
+[§ 什么是 MDX 中的 ¶ Markdown][what-markdown]
+
+### GFM
+
+我们默认关闭了 MDX 中的 GFM 功能。
+GFM 扩展了 CommonMark，添加了自动链接字面量、脚注、删除线、
+表格和任务列表。
+如果你确实需要这些功能，可以使用插件。
+请参见[我们的 GFM 指南][guide-gfm]。
+
+## 更新 MDX 内容
+
+从 MDX 生成的 JavaScript 接口已更改：
+
+* 缺失的组件现在会抛出错误，而不是渲染其子元素
+  并向控制台发出警告，这更接近 React 等框架处理
+  未定义 JSX 组件的方式
+* `parent.child` 组合（如 `ol.li`）用于传递组件的功能已移除，我们
+  建议分别样式化你的 `ol`、`ul` 和 `li`
+* 特殊组件名称 `inlineCode` 已移除，我们建议对代码的块级版本
+  使用 `pre`，对块级和行内版本都使用 `code`
+* `MDXContent.isMDXContent` 已移除，我们建议像对待任何其他组件一样
+  对待 `MDXContent`
+* 本地定义或导入的组件优先于传递的组件
+* 我们现在"沙盒化"组件（没有更好的名字）。
+  这意味着当你为 `h1` 传递一个组件时，它会用于
+  `# hi` 但不会用于 `<h1>hi</h1>`
+* 你现在可以传递和使用组件对象：如果你传递
+  `components={{theme}}`，其中 `theme` 是一个包含 `Box` 组件的对象，
+  它可以通过以下方式使用：`<theme.Box>stuff</theme.Box>`
+* 从 MDX 文件导出的值不再传递给布局，你可以通过以下方式实现
+  相同的效果：
+  ```tsx
+  import * as everything from './example.mdx'
+  const {default: Content, ...exported} = everything
+  <Content {...exported} />
+  ```
+
+我们还修复了几个定义、导入或传递的组件未被正确处理甚至崩溃的
+情况。
+
+***
+
+呼。
+你做到了！
+欢迎登上 MDX 2 列车，这是一段旅程。
+我们知道迁移并不容易，很高兴你还在这里，我们
+下次会尽量让迁移更容易。
+有了我们的新 AST，从现在起我们可以创建 codemod 了。
+\<3
+
+[babel-loader]: https://webpack.js.org/loaders/babel-loader/
+
+[esm]: #esm
+
+[guide-gfm]: /guides/gfm/
+
+[loader-api]: /packages/loader/#api
+
+[mdx-api]: /packages/mdx/#api
+
+[mdx-compile]: /packages/mdx/#compilefile-options
+
+[mdx-compilesync]: /packages/mdx/#compilesyncfile-options
+
+[mdx-createprocessor]: /packages/mdx/#createprocessoroptions
+
+[mdx-evaluate]: /packages/mdx/#evaluatefile-options
+
+[mdx-evaluatesync]: /packages/mdx/#evaluatesyncfile-options
+
+[mdx-provider]: /docs/using-mdx/#mdx-provider
+
+[mdx-react]: /packages/react/
+
+[remark-gfm]: https://github.com/remarkjs/remark-gfm
+
+[remark-mdx-use]: /packages/remark-mdx/#use
+
+[trouble]: /docs/troubleshooting-mdx/
+
+[trouble-esm]: /docs/troubleshooting-mdx/#esm
+
+[vfile]: https://github.com/vfile/vfile
+
+[what-esm]: /docs/what-is-mdx/#esm
+
+[what-expressions]: /docs/what-is-mdx/#expressions
+
+[what-jsx]: /docs/what-is-mdx/#jsx
+
+[what-markdown]: /docs/what-is-mdx/#markdown

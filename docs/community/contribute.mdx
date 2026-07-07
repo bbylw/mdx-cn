@@ -1,0 +1,130 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2018-11-04')
+}
+export const navSortSelf = 2
+
+# 贡献
+
+本文说明了如何为 MDX 做贡献。
+请阅读以下指南。
+
+{/* more */}
+
+<Note type="important">
+  **重要**：在参与我们的社区之前，请阅读我们的
+  [行为准则][coc]。
+  通过与本仓库、组织或社区互动，即表示你同意遵守其条款。
+</Note>
+
+## 贡献方式
+
+有多种方式可以贡献，不仅仅是编写代码。
+如果你有问题，请参见[§ 支持][support]。
+如果你可以提供财务支持，请参见[§ 赞助][sponsor]。
+
+### 改进文档
+
+作为用户，你最适合帮助我们改进文档。
+包括纠正错别字、修复错误、改进说明、添加新示例等。
+所有 MDX 文档都在 `docs/` 中。
+
+你可以在本地运行文档，参见下文的[¶ 网站][site]。
+
+### 改进 issue
+
+一些 issue 缺少信息、无法复现或只是不正确的。
+你可以通过让它们更容易解决来提供帮助。
+现有的 issue 可能会从你独特的经验或观点中受益。
+
+### 编写代码
+
+非常欢迎代码贡献。
+在创建 pull request 之前，最好先提一个问题或开一个 issue
+来报告 bug 或建议新功能。
+
+## 提交 issue
+
+* issue 跟踪器用于报告 issue。
+  请使用讨论区寻求支持
+* 在创建新 issue 之前，先搜索 issue 跟踪器（包括已关闭的 issue）
+* 确保你使用的是我们包的最新版本
+* 使用清晰、描述性的标题
+* 尽可能包含更多信息：复现步骤、错误消息、版本、操作系统等
+* 你在 issue 上投入的时间越多，我们就越能帮助你
+* 最好的 issue 报告是一个能证明问题的失败测试
+
+## 提交 pull request
+
+* 关于项目结构、测试和构建网站的信息，请参见下文的
+  [¶ 项目][project]
+* 非平凡的更改通常最好先在 issue 中讨论，以防止你做不必要的工作
+* 对于宏大的任务，你应该尽快将你的工作展示给社区以获取反馈
+* 新功能应附带测试和文档
+* 不要包含不相关的更改
+* 提交代码前运行 `npm test` 进行测试
+* 写一个有说服力的描述，说明我们为什么应该接受你的 pull request：
+  说服我们是你的职责
+
+## 项目
+
+### 结构
+
+MDX 是一个 monorepo。
+所有包都在 `packages/` 中。
+文档在 `docs/` 中。
+
+### 测试
+
+要运行测试，首先执行 `npm install`，然后执行 `npm test`。
+这会确保一切正常，包括代码风格、单元测试和类型检查。
+
+### 网站
+
+要构建网站，首先执行 `npm install`，然后执行 `npm run docs`。
+这会在 `public/` 中生成网站。
+
+### 发布
+
+要发布新版本，请执行以下操作：
+
+1. 使用 patch、minor 或 major 更新包的 `version`（必要时更新
+   monorepo 包的依赖范围）：
+   ```sh
+   npm version minor --workspaces --no-git-tag-version
+   ```
+2. 使用版本号（不带 `v`）作为消息进行提交和标签：
+   ```sh
+   git commit --all --message 1.2.3 && git tag 1.2.3 && git push && git push --tags
+   ```
+3. 发布到 npm 仓库：
+   ```sh
+   npm publish --workspaces
+   ```
+4. 在 GitHub 上为该发布添加更新日志条目：
+   ```sh
+   open https://github.com/mdx-js/mdx/releases
+   ```
+
+## 资源
+
+* [MDX 仓库中的入门 issue](https://github.com/mdx-js/mdx/labels/good%20first%20issue%20👋)
+* [如何为开源做贡献](https://opensource.guide/how-to-contribute/)
+* [你的第一次贡献](https://medium.com/@vadimdemedes/making-your-first-contribution-de6576ddb190)
+* [使用 pull request](https://help.github.com/articles/about-pull-requests/)
+* [GitHub 帮助](https://help.github.com)
+
+[coc]: https://github.com/mdx-js/.github/blob/main/code-of-conduct.md
+
+[project]: #project
+
+[site]: #site
+
+[sponsor]: /community/sponsor/
+
+[support]: /community/support/

@@ -1,0 +1,65 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'johno', name: 'John Otander'}
+  ],
+  modified: new Date('2021-11-01'),
+  published: new Date('2019-05-14')
+}
+
+<Note type="legacy">
+  **注意**：这是一篇旧的博客文章。
+  其中描述的功能目前记录在
+  [§ MDX provider](/docs/using-mdx/#mdx-provider)。
+  以下内容为历史目的而保留原样。
+</Note>
+
+# Shortcodes
+
+MDX v1 中一个令人兴奋的新功能是全局 shortcodes。
+它允许你将组件暴露给你的应用或网站中的所有文档。
+这对于常用组件（如 YouTube 嵌入、Twitter 卡片或在文档中频繁使用的
+其他任何内容）是一个很有用的功能。
+
+{/* more */}
+
+如果你有一个 MDX 文档的应用程序包装器，
+你可以使用 `MDXProvider` 添加组件：
+
+```tsx path="src/App.js"
+import React from 'react'
+import {MDXProvider} from '@mdx-js/react'
+import {TomatoBox, Twitter, YouTube} from './ui'
+
+const shortcodes = {TomatoBox, Twitter, YouTube}
+
+export default ({children}) => (
+  <MDXProvider components={shortcodes}>{children}</MDXProvider>
+)
+```
+
+然后，任何被 `App` 包裹的 MDX 文档都可以访问 `YouTube`、
+`Twitter` 和 `TomatoBox`。
+Shortcodes 只不过是组件，所以你可以在 MDX 文档的任何地方
+用 JSX 引用它们。
+
+```mdx path="example.mdx"
+# Hello world!
+
+Here's a YouTube shortcode:
+
+<YouTube tweetId="1234" />
+
+Here's a YouTube shortcode wrapped in TomatoBox:
+
+<TomatoBox>
+  <YouTube videoId="1234" />
+</TomatoBox>
+```
+
+就是这样。
+🎉 🚀
+
+非常感谢 [Chris Biscardi](https://christopherbiscardi.com)
+构建了这个功能的大部分。

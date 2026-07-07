@@ -1,0 +1,133 @@
+import {Chart} from './_component/snowfall.jsx'
+
+export {Home as default} from './_component/home.jsx'
+export const info = {
+  author: [
+    {github: 'johno', name: 'John Otander'},
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2017-12-23'),
+  schemaOrg: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "additionalType": "ComputerLanguage",
+    "applicationCategory": "DeveloperApplication",
+    "description": "一种可在 Markdown 文档中编写 JSX 的可创作格式",
+    "name": "MDX",
+    "offers": {
+      "@type": "Offer",
+      "price": "0.00",
+      "priceCurrency": "USD"
+    },
+    "operatingSystem": "Windows, MacOS, Linux",
+    "sameAs": [
+      "https://www.wikidata.org/wiki/Q95971592",
+      "https://www.wikidata.org/wiki/Q27966906",
+      "https://www.wikidata.org/wiki/Q95961071",
+      "https://en.wikipedia.org/wiki/MDX_(markup_language)",
+      "https://github.com/mdx-js/mdx"
+    ],
+    "url": "https://mdxjs.com"
+  }
+}
+export const year = 2023
+
+{/* lint disable heading-style */}
+
+面向组件时代的\
+**Markdown**
+=================
+
+MDX 让你可以在 Markdown 内容中使用 JSX。
+你可以导入组件，例如交互式图表或提示框，并将它们嵌入到内容中。
+这让使用组件编写长篇内容变得非常轻松。 {/* more */}
+🚀
+[继续阅读 »][what]
+
+<div className="card big">
+  ## 新特性：MDX 3！
+
+  这次是一个较小的主版本更新，没什么大改动，这也不错！
+  主要变更包括：不再支持旧版 Node（需使用 16 或更高版本）、
+  在 MDX 中支持现代 ES2024 语法、支持在 MDX 中使用 `await`（如果你的框架也支持的话），
+  以及移除了若干已废弃的选项。
+
+  [继续阅读 »][v3]
+</div>
+
+## MDX 能做什么？
+
+<div className="big-columns">
+  <div>
+    你可以通过 JSX 在 Markdown 中嵌入组件：
+
+    ```mdx path="example.mdx"
+    import {Chart} from './snowfall.js'
+    export const year = 2023
+
+    # 去年的降雪量
+
+    在 {year} 年，降雪量高于平均水平。
+    随后迎来了温暖的春天，导致附近许多河流
+    出现了洪水泛滥的情况。
+
+    <Chart color="#fcb32c" year={year} />
+    ```
+  </div>
+
+  <div>
+    它会被编译为 JavaScript，你可以在任何支持 JSX 的
+    框架中使用：
+
+    {/* lint disable no-multiple-toplevel-headings */}
+
+    <div className="home-preview">
+      # 去年的降雪量
+
+      在 {year} 年，降雪量高于平均水平。
+      随后迎来了温暖的春天，导致附近许多河流出现了洪水泛滥的情况。
+
+      <Chart color="#fcb32c" year={year} />
+    </div>
+
+    {/* lint enable no-multiple-toplevel-headings */}
+  </div>
+</div>
+
+我们制作了一个交互式 playground，你可以在这里试用 MDX 并查看它的转换结果。
+[体验 »][playground]
+
+## 快速开始
+
+大多数打包器、框架和编辑器都有相应的集成。
+无论你使用 Docusaurus、Next.js 还是 Vite。
+无论你偏好 Rollup、esbuild 还是 webpack。
+无论你使用 React、Preact 还是 Vue。
+[开始使用 »][getting-started]
+
+## MDX 简述
+
+<div className="emoji-list">
+  * ❤️ **功能强大**：MDX 融合了 Markdown 和 JSX 语法，完美适配
+    基于 JSX 的项目
+  * 💻 **一切皆组件**：在 MDX 中使用已有组件，也可以将其他 MDX 文件
+    作为组件导入
+  * 🔧 **高度可定制**：可以决定每种 Markdown 结构渲染为哪个组件
+    （`{h1: MyHeading}`）
+  * 📚 **基于 Markdown**：保留了 Markdown 的简洁与优雅，
+    只在需要时才使用 JSX
+  * 🔥 **极速 blazing fast**：MDX 没有运行时，所有编译都在构建阶段完成
+</div>
+
+> lol mdx 太好用了
+>
+> — **@dan\_abramov**
+
+[getting-started]: /docs/getting-started/
+
+[playground]: /playground/
+
+[v3]: /blog/v3/
+
+[what]: /docs/what-is-mdx/

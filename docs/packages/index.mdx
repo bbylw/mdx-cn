@@ -1,0 +1,43 @@
+{
+  /**
+   * @import {Item} from '../_component/sort.js'
+   */
+
+  /**
+   * @typedef Props
+   * @property {Item} navigationTree
+   */
+}
+
+import assert from 'node:assert/strict'
+import {NavigationGroup} from '../_component/nav.jsx'
+
+export const info = {
+  author: [{name: 'MDX 贡献者'}],
+  modified: new Date('2024-07-04'),
+  published: new Date('2021-11-01')
+}
+export const navSortSelf = 3
+
+# 包
+
+此索引列出了在我们的 monorepo 中维护的包。
+包括 `@mdx-js/mdx`（我们的核心编译器）、`remark-mdx`（支持
+MDX 语法的 remark 插件），以及多个与打包器和前端框架的集成。
+
+{
+  (function () {
+    const navigationTree = props.navigationTree
+    const category = navigationTree.children.find(function (item) {
+      return item.name === '/packages/'
+    })
+    assert(category)
+
+    return (
+      <nav>
+        <NavigationGroup items={category.children} includeDescription />
+      </nav>
+    )
+  })()
+}
+

@@ -1,0 +1,161 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2021-10-06')
+}
+export const navSortSelf = 4
+
+# 语法高亮
+
+本指南探讨了如何对代码块应用语法高亮。 {/* more */}
+MDX 支持标准 Markdown 语法（[CommonMark][]）。
+它默认不对代码块应用语法高亮。
+
+有两种方式实现语法高亮：编译时或运行时。
+在编译时进行意味着预先投入精力，这样读者将
+有快速的体验，因为没有额外的代码发送给他们（语法高亮
+需要*大量*代码才能工作）。
+在运行时进行通过将工作转移到客户端提供更多灵活性。
+但这可能导致读者体验缓慢。
+它还取决于你使用的框架（即特定于 React、Preact、
+Vue 等）
+
+## 编译时语法高亮
+
+例如使用 [`rehype-starry-night`][rehype-starry-night]（`starry-night`）、
+[`rehype-highlight`][rehype-highlight]（`lowlight`、`highlight.js`）
+或 [`@mapbox/rehype-prism`][rehype-prism]（`refractor`、`prism`），
+像这样：
+
+```js twoslash path="example.js"
+/// <reference types="node" />
+// ---cut---
+import {compile} from '@mdx-js/mdx'
+import rehypeStarryNight from 'rehype-starry-night'
+
+const code = `~~~js
+console.log(1)
+~~~`
+
+console.log(
+  String(await compile(code, {rehypePlugins: [rehypeStarryNight]}))
+)
+```
+
+<details>
+  <summary>展开等价 JSX</summary>
+
+  ```jsx path="output.jsx"
+  <>
+    <pre>
+      <code className="language-js">
+        <span className="pl-en">console</span>.<span className="pl-c1">log</span>(<span className="pl-c1">1</span>)
+      </code>
+    </pre>
+  </>
+  ```
+</details>
+
+<Note type="important">
+  **重要**：你很可能还需要在页面上某处包含 CSS。
+  参见你正在使用的插件的文档获取更多信息。
+</Note>
+
+## 运行时语法高亮
+
+例如使用
+[`react-syntax-highlighter`][react-syntax-highlighter]，
+像这样：
+
+{/* Note: `react-syntax-highlighter` doesn't seem actively maintained so no twoslash to check this example. */}
+
+```jsx path="example.jsx"
+import SyntaxHighlighter from 'react-syntax-highlighter'
+import Post from './example.mdx' // Assumes an integration is used to compile MDX -> JS.
+
+console.log(<Post components={{code}} />)
+
+function code({className, ...properties}) {
+  const match = /language-(\w+)/.exec(className || '')
+  return match
+    ? <SyntaxHighlighter language={match[1]} PreTag="div" {...properties} />
+    : <code className={className} {...properties} />
+}
+```
+
+<details>
+  <summary>展开等价 JSX</summary>
+
+  ```jsx path="output.jsx"
+  <>
+    <pre>
+      <div
+        className="language-js"
+        style={{
+          background: '#F0F0F0',
+          color: '#444',
+          display: 'block',
+          overflowX: 'auto',
+          padding: '0.5em'
+        }}
+      >
+        <code style={{whiteSpace: 'pre'}}>
+          <span>console.</span>
+          <span style={{color: '#397300'}}>log</span>
+          <span>(</span>
+          <span style={{color: '#880000'}}>1</span>
+          <span>)</span>
+        </code>
+      </div>
+    </pre>
+  </>
+  ```
+</details>
+
+## 使用 `meta` 字段进行语法高亮
+
+Markdown 支持代码的 meta 字符串：
+
+````mdx path="example.mdx"
+```js filename="index.js"
+console.log(1)
+```
+````
+
+`meta` 部分是语言（本例中为 `js`）之后的所有内容。
+这是 Markdown 的一个*隐藏*部分：通常被忽略。
+但如上例所示，它是放置一些额外字段的有用位置。
+
+`@mdx-js/mdx` 不知道你是否将代码作为组件处理或
+该 meta 字符串的格式是什么，所以它默认按 Markdown 的方式处理：
+`meta` 被忽略。
+
+但如果你想在运行时访问 `meta` 呢？
+这正是 rehype 插件
+[`rehype-mdx-code-props`][rehype-mdx-code-props] 所做的。
+它让你在 `meta` 部分输入 JSX 属性，你可以通过
+`pre` 的组件来访问。
+
+该插件与所有 rehype 插件一样，可以作为
+[`ProcessorOptions` 中的 `rehypePlugins`][processor-options] 传递。
+有关插件的更多信息请参见[§ 扩展 MDX][extend]
+
+[commonmark]: https://spec.commonmark.org/current/
+
+[extend]: /docs/extending-mdx/
+
+[processor-options]: /packages/mdx/#processoroptions
+
+[react-syntax-highlighter]: https://github.com/react-syntax-highlighter/react-syntax-highlighter
+
+[rehype-highlight]: https://github.com/rehypejs/rehype-highlight
+
+[rehype-mdx-code-props]: https://github.com/remcohaszing/rehype-mdx-code-props
+
+[rehype-prism]: https://github.com/mapbox/rehype-prism
+
+[rehype-starry-night]: https://github.com/rehypejs/rehype-starry-night

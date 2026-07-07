@@ -1,0 +1,341 @@
+import {Note} from '../_component/note.jsx'
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2022-02-01')
+}
+
+<Note type="legacy">
+  **注意**：这是一篇旧的博客文章。
+  以下内容为历史目的而保留原样。
+</Note>
+
+<Note type="info">
+  **注意**：有关如何迁移的信息，请参阅我们的
+  [版本 2 迁移指南][migrating]。
+</Note>
+
+# MDX 2
+
+经过多年的努力，MDX 版本 2 发布了，包含了许多改进。
+以下是亮点：
+
+{/* more */}
+
+<div className="emoji-list">
+  * 📝 **改进的语法** 让在 JSX 中使用 Markdown 更容易
+  * 🧑‍💻 **JavaScript 表达式** 将 `{2 * Math.PI}` 变成 {2 * Math.PI}
+  * 🔌 新的 **esbuild**、**Rollup** 和 **Node.js** 集成
+  * ⚛️ **任何 JSX 运行时**：React、Preact、Vue、Emotion，你说的出来的都支持
+  * 🌳 **改进的 AST** 暴露了更多更详细的信息
+  * 🏃‍♀️ 编译速度至少快了 **25%**
+  * 🚴 生成的代码运行速度快了两倍（**快 100%**）
+  * 🚄 `@mdx-js/mdx` 的打包体积小了三倍多（**小 250%**）
+  * 🧵 ……还有更多更多
+</div>
+
+这个项目公布已经 4 年了。
+距离我们发布稳定的版本 1 已经过了 2 年半。
+**我们很自豪终于发布 v2！**
+让我们深入看看！
+
+## 目录
+
+* [MDX 格式的改进](#improvements-to-the-mdx-format)
+* [Rollup、esbuild 和其他集成](#rollup-esbuild-and-other-integrations)
+* [架构改进](#architectural-improvements)
+* [TypeScript](#typescript)
+* [文档和网站](#docs--site)
+* [破坏性变更](#breaking-changes)
+* [致谢](#thanks)
+
+## MDX 格式的改进
+
+我们花了很多时间思考和尝试不同的方式来改进格式。
+最初，格式非常接近 Markdown 以及 Markdown 中 HTML 的工作方式。
+我们发现旧行为经常产生意外的结果。
+在版本 2 中，我们将格式稍微向 JS(X) 的工作方式靠拢。
+
+以这个 MDX 文件为例：
+
+```mdx chrome=no
+<div>*hi*?</div>
+
+<div>
+  # hi?
+</div>
+
+<main>
+  <div>
+
+    # hi?
+
+  </div>
+</main>
+```
+
+<div className="big-columns">
+  <div>
+    在版本 1 中，它等价于以下 JSX：
+
+    ```tsx chrome=no
+    <>
+      <div>*hi*?</div>
+      <div>
+        # hi?
+      </div>
+      <main>
+        <div>
+          <pre><code># hi?</code></pre>
+        </div>
+      </main>
+    </>
+    ```
+  </div>
+
+  <div>
+    在版本 2 中，它等价于以下 JSX：
+
+    ```tsx chrome=no
+    <>
+      <div><em>hi</em>?</div>
+      <div>
+        <h1>hi?</h1>
+      </div>
+      <main>
+        <div>
+          <h1>hi?</h1>
+        </div>
+      </main>
+    </>
+    ```
+  </div>
+</div>
+
+我们认为以下行为更直观：同一行标签之间可以形成 Markdown "行内"语法
+如强调（第一个 `<div>`），如果标题在自己的行上则可以形成"块"
+（第二个 `<div>`），并且允许缩进而不是形成代码（第三个 `<div>`）。
+
+我们还添加了对 JavaScript 表达式的支持，例如：
+
+<div className="big-columns">
+  <div>
+    ```mdx path="expressions.mdx"
+    export const authors = [
+      {name: 'Jane', email: 'hi@jane.com'},
+      {name: 'John', github: '@johno'}
+    ]
+    export const published = new Date('2022-02-01')
+
+    Written by: {new Intl.ListFormat('en').format(authors.map(d => d.name))}.
+
+    Published on: {new Intl.DateTimeFormat('en', {dateStyle: 'long'}).format(published)}.
+    ```
+  </div>
+
+  <div>
+    ```tsx path="equivalent.jsx"
+    <>
+      <p>Written by: Jane and John.</p>
+      <p>Published on: February 1, 2022.</p>
+    </>
+    ```
+  </div>
+</div>
+
+随着格式从 Markdown 稍微向 JSX 靠拢，我们添加了对加载不带我们语法扩展的
+"普通" Markdown 的支持。
+如果你使用我们的打包器集成 `@mdx-js/loader`（或 `@mdx-js/rollup`、
+`@mdx-js/esbuild` 或 `@mdx-js/node-loader`，见下一节），那么它就能
+直接工作：导入 `readme.mdx` 会被视为 MDX 格式，导入
+`readme.md` 会被视为 Markdown，基于它们的扩展名。
+
+MDX 格式在 [§ 什么是 MDX][what] 中有描述。
+
+## Rollup、esbuild 和其他集成
+
+当我们开始时，Babel、webpack 和 React 在 JavaScript 生态系统中无处不在，
+我们在它们之上构建了 MDX。
+对于版本 2，我们努力使它们变为可选。
+它们不再是必需的，MDX 可以更轻松地与其他工具一起使用。
+
+在打包器方面，我们添加了新的集成：`@mdx-js/esbuild` 用于
+esbuild（一个极快的打包器）和 `@mdx-js/rollup` 用于 Rollup（也用于
+Vite 和 WMR 的打包器）。
+你甚至可以使用我们新的 `@mdx-js/node-loader` 在 Node.js 中直接导入
+MDX 文件。
+
+在运行时方面，我们现在可以将 JSX 编译为普通 JavaScript，
+不再需要框架特定的代码来将它们与 MDX 粘合在一起。
+现在支持任何 JSX 运行时，无论是 [classic 还是 automatic][jsx-runtime]。
+这意味着 MDX 可以与 React、Preact、Vue、Emotion、Theme UI、Ink 等
+一起使用，还有未来发明的任何东西！
+
+参见 [§ 快速开始][getting-started] 了解快速入门以及如何将 MDX 与
+许多不同工具集成的深入信息。
+
+## 架构改进
+
+为了使 MDX 格式的语法更好，并允许新的集成和任意 JSX 运行时，
+我们几乎重写了所有内容。
+其中一部分工作是 [micromark][]，那是另一个故事，但这意味着我们
+完全符合 CommonMark（和可选的 GFM），同时还能更好地理解 MDX 文件。
+
+现在，当有拼写错误时，我们可以提前抛出错误并准确指向发生位置，
+而不是让 webpack 等后续打包器抱怨一个中间的、不可识别的、
+损坏的 JavaScript 字符串中的错误。
+这也意味着我们有一个新的 AST，更详细地描述了 MDX 语法——
+我们甚至暴露了嵌入的 JavaScript。
+这个详细的 AST 允许插件以强大的新方式增强 MDX。
+它还帮助解决了以前 MDX 会崩溃的边缘情况。
+并且它让我们可以放弃 Babel。
+
+这种新架构带来了 **25% 更快** 的编译速度，运行速度快两倍的
+生成代码（**快 100%**），以及 `@mdx-js/mdx` 的打包体积小了三倍多
+（**小 250%**）。
+
+参见 [¶ `@mdx-js/mdx` 中的架构][architecture] 了解更多关于编译器
+工作原理的信息。
+参见 [§ 扩展 MDX][extending] 了解几个使用新树来增强 MDX 的插件、
+如何使用它们和其他插件，以及如何创建插件。
+
+## TypeScript
+
+所有 [`@mdx-js/*` 包][packages] 现在通过 JSDoc 注释完全使用
+[TypeScript][] 进行了类型标注。
+这意味着我们的 API 以 TypeScript 类型暴露，而且我们的项目
+内部也是类型安全的。
+
+我们发布了 [`@types/mdx`][types-mdx]，一个仅包含类型的包，可以与
+任何（社区）集成一起使用。
+如果你导入 MDX 文件，你可以使用它来为那些导入的组件进行类型标注。
+
+参见 [§ 快速开始中的 ¶ TypeScript][ts] 了解更多关于如何配置
+TypeScript 的信息。
+
+## 文档和网站
+
+MDX 被大量使用和喜爱。
+在版本 1 之前，我们累计了 **250 万次下载**。
+现在我们每周就达到这个数字。
+我们的核心编译器 `@mdx-js/mdx` 被 **6.1 万个项目**使用。
+我们的 GitHub 仓库有 **1.16 万 stars**。
+
+很多人帮忙，通常是帮忙改进文档。
+自版本 1 以来，有 85 位贡献者提交了我们的仓库。
+我们感谢这些贡献和所有个人见解，
+但这些年来确实导致了一些不一致和重复内容。
+
+对于版本 2，我们从头到尾重写了文档，为新用户、做复杂 AST 和
+编译器的人以及介于两者之间的任何人讲述一个一致的故事。
+
+我们还做了一个新网站。
+它当然是用 MDX 构建的，[unified][] 本身，以及
+[React Server Components (RSC)][rsc]。
+虽然我们在吃自己的狗粮（前两者是我们维护的项目），而后者
+还非常实验性，但我们认为提前编译和混合模型，
+与完全服务端网站或完全客户端应用相比，对我们和 Web 的未来是
+明智的选择。
+
+我们的新网站经过高度优化且快速，美观（主观的，但嘿），
+有丰富的元数据，在 Lighthouse 和 axe 等性能和可访问性审查工具中
+得分很高。
+
+参见 [§ 贡献][contribute] 了解更多关于如何帮助的信息。
+
+## 破坏性变更
+
+当你准备好迁移时，请参阅
+[版本 2 迁移指南][migrating]。
+
+## 致谢
+
+我们要感谢所有的贡献者和开心的用户。
+特别感谢
+John Otander ([**@johno**](https://github.com/johno)),
+Christian Murphy ([**@ChristianMurphy**](https://github.com/ChristianMurphy)),
+JounQin ([**@JounQin**](https://github.com/JounQin)),
+Jack Bates ([**@jablko**](https://github.com/jablko)),
+Sam Chen ([**@chenxsan**](https://github.com/chenxsan)),
+Sam Robbins ([**@samrobbins85**](https://github.com/samrobbins85)),
+Remco Haszing ([**@remcohaszing**](https://github.com/remcohaszing)),
+LB ([**@laurieontech**](https://github.com/laurieontech)),
+Gabriel Kirkley ([**@gdgkirkley**](https://github.com/gdgkirkley)>),
+Hung-I Wang ([**@Gowee**](https://github.com/Gowee)),
+Ilham Wahabi ([**@iwgx**](https://github.com/iwgx)),
+Kaito Sugimoto ([**@HelloRusk**](https://github.com/HelloRusk)),
+Karl Horky ([**@karlhorky**](https://github.com/karlhorky)),
+Katie Hughes ([**@glitteringkatie**](https://github.com/glitteringkatie)),
+Lachlan Campbell ([**@lachlanjc**](https://github.com/lachlanjc)),
+Marcy Sutton ([**@marcysutton**](https://github.com/marcysutton)),
+Marius Gundersen ([**@mariusGundersen**](https://github.com/mariusGundersen)),
+Marius-Remus Mate,
+Mark Skelton ([**@mskelton**](https://github.com/mskelton)),
+Martin V ([**@ndresx**](https://github.com/ndresx)),
+Matija Marohnić ([**@silvenon**](https://github.com/silvenon)),
+Michael Oliver ([**@michaeloliverx**](https://github.com/michaeloliverx)),
+Michaël De Boey ([**@MichaelDeBoey**](https://github.com/MichaelDeBoey)),
+Muescha ([**@muescha**](https://github.com/muescha)),
+Norviah ([**@Norviah**](https://github.com/Norviah)),
+Paul Scanlon ([**@PaulieScanlon**](https://github.com/PaulieScanlon)),
+Peter Mouland ([**@peter-mouland**](https://github.com/peter-mouland)),
+Prince Wilson ([**@maxcell**](https://github.com/maxcell)),
+Rafael Almeida ([**@rafaelalmeidatk**](https://github.com/rafaelalmeidatk)),
+Rodrez ([**@rodrez**](https://github.com/rodrez)),
+Rongjian Zhang ([**@pd4d10**](https://github.com/pd4d10)),
+Taeheon Kim ([**@lonyele**](https://github.com/lonyele)),
+Tom Parker-Shemilt ([**@palfrey**](https://github.com/palfrey)),
+Try Ajitiono ([**@imballinst**](https://github.com/imballinst)),
+Yamagishi Kazutoshi ([**@ykzts**](https://github.com/ykzts)),
+Yoav Kadosh ([**@ykadosh**](https://github.com/ykadosh)),
+Yordis Prieto ([**@Yordis**](https://github.com/Yordis)),
+Adrian Foong ([**@adrfoong**](https://github.com/adrfoong)),
+Dan Abramov ([**@gaearon**](https://github.com/gaearon)),
+[**@ihupoo**](https://github.com/ihupoo),
+[**@nikhog**](https://github.com/nikhog),
+[**@redallen**](https://github.com/redallen),
+Akshay Kadam ([**@deadcoder0904**](https://github.com/deadcoder0904)),
+я котик пур-пур ([**@mvasilkov**](https://github.com/mvasilkov)),
+Anders D. Johnson ([**@AndersDJohnson**](https://github.com/AndersDJohnson)),
+Andrew Aylett ([**@andrewaylett**](https://github.com/andrewaylett)),
+Ankeet Maini ([**@ankeetmaini**](https://github.com/ankeetmaini)),
+Biswas Nandamuri ([**@Biswas-N**](https://github.com/Biswas-N)),
+Bret ([**@bcomnes**](https://github.com/bcomnes)),
+Chris Chinchilla ([**@ChrisChinchilla**](https://github.com/ChrisChinchilla)),
+Christopher Biscardi ([**@ChristopherBiscardi**](https://github.com/ChristopherBiscardi)),
+Dan Overton ([**@dan-overton**](https://github.com/dan-overton)),
+Domitrius ([**@domitriusclark**](https://github.com/domitriusclark)),
+Dovi Winberger ([**@dowi**](https://github.com/dowi)),
+Emmie Päivärinta ([**@emmiep**](https://github.com/emmiep)),
+Eugene Ghanizadeh ([**@loreanvictor**](https://github.com/loreanvictor)),
+以及任何我们可能遗漏的人。
+
+[architecture]: /packages/mdx/#architecture
+
+[contribute]: /community/contribute/
+
+[extending]: /docs/extending-mdx/
+
+[getting-started]: /docs/getting-started/
+
+[jsx-runtime]: https://reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html
+
+[micromark]: https://github.com/micromark/micromark
+
+[migrating]: /migrating/v2/
+
+[packages]: /packages/
+
+[rsc]: https://reactjs.org/blog/2020/12/21/data-fetching-with-react-server-components.html
+
+[ts]: /docs/getting-started/#types
+
+[types-mdx]: https://github.com/DefinitelyTyped/DefinitelyTyped/tree/HEAD/types/mdx
+
+[typescript]: https://www.typescriptlang.org
+
+[unified]: https://unifiedjs.com
+
+[what]: /docs/what-is-mdx/

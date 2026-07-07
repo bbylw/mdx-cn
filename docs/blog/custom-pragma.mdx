@@ -1,0 +1,237 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'christopherbiscardi', name: 'Chris Biscardi'}
+  ],
+  modified: new Date('2021-11-01'),
+  published: new Date('2019-03-11')
+}
+
+<Note type="legacy">
+  **注意**：这是一篇旧的博客文章。
+  其中描述的步骤不再由 MDX 执行。
+  它现在首先使用 JavaScript AST，而不是生成 JSX 字符串。
+  也不再需要在客户端使用将 MDX 与特定框架结合的额外胶水代码。
+  更多信息请参见 [§ MDX 的工作原理](/docs/using-mdx/#how-mdx-works)
+  和 [¶ 架构](/packages/mdx/#architecture)。
+  以下内容为历史目的而保留原样。
+</Note>
+
+# 自定义 pragma
+
+`MDXTag` 是 MDX 用自定义 React 组件替换 `<pre>` 和 `<h1>` 等
+HTML 原语的关键部分，对于那些不了解的人来说。
+[我之前写过](https://www.christopherbiscardi.com/post/codeblocks-mdx-and-mdx-utils)
+关于尝试用自定义代码组件替换 `<pre>` 标签时
+`MDXTag` 的工作方式。
+[mdx-utils](https://github.com/ChristopherBiscardi/gatsby-mdx/blob/00769a1b72455f40843cd2f09ee34fd63b009fb2/packages/mdx-utils/index.js)
+包含了在 `pre` 和 `code` 之间的 `MDXTag` 元素中适当传递 props
+的方法论。
+
+{/* more */}
+
+```tsx
+exports.preToCodeBlock = preProps => {
+  if (
+    // children is MDXTag
+    preProps.children &&
+    // MDXTag props
+    preProps.children.props &&
+    // if MDXTag is going to render a <code>
+    preProps.children.props.name === 'code'
+  ) {
+    // we have a <pre><code> situation
+    const {
+      children: codeString,
+      props: {className, ...props}
+    } = preProps.children.props
+
+    return {
+      codeString: codeString.trim(),
+      language: className && className.split('-')[1],
+      ...props
+    }
+  }
+  return undefined
+}
+```
+
+所以 `MDXTag` 是所有其他 MDX 渲染元素中间的一个真实组件。
+此处包含所有代码以供参考。
+
+```tsx
+import React, {Component} from 'react'
+
+import {withMDXComponents} from './mdx-provider'
+
+const defaults = {
+  inlineCode: 'code',
+  wrapper: 'div'
+}
+
+class MDXTag extends Component {
+  render() {
+    const {
+      name,
+      parentName,
+      props: childProps = {},
+      children,
+      components = {},
+      Layout,
+      layoutProps
+    } = this.props
+
+    const Component =
+      components[`${parentName}.${name}`] ||
+      components[name] ||
+      defaults[name] ||
+      name
+
+    if (Layout) {
+      return (
+        <Layout components={components} {...layoutProps}>
+          <Component {...childProps}>{children}</Component>
+        </Layout>
+      )
+    }
+
+    return <Component {...childProps}>{children}</Component>
+  }
+}
+
+export default withMDXComponents(MDXTag)
+```
+
+`MDXTag` 用于 hast 到 estree 的转换，
+这是 MDX AST 管道的最后一步。
+每个可渲染元素都被包裹在 `MDXTag` 中，`MDXTag` 负责稍后渲染元素。
+
+```tsx
+return `<MDXTag name="${node.tagName}" components={components}${
+  parentNode.tagName ? ` parentName="${parentNode.tagName}"` : ''
+}${props ? ` props={${props}}` : ''}>${children}</MDXTag>`
+```
+
+## 具体示例
+
+以下 MDX
+
+```mdx
+# a title
+
+    and such
+
+testing
+```
+
+转换为以下 React 代码
+
+```tsx
+export default ({components, ...props}) => (
+  <MDXTag name="wrapper" components={components}>
+    <MDXTag name="h1" components={components}>{`a title`}</MDXTag>{' '}
+    <MDXTag name="pre" components={components}>
+      <MDXTag
+        name="code"
+        components={components}
+        parentName="pre"
+        props={{metaString: null}}
+      >{`and such `}</MDXTag>
+    </MDXTag>{' '}
+    <MDXTag name="p" components={components}>{`testing`}</MDXTag>
+  </MDXTag>
+)
+```
+
+生成以下 HTML
+
+```html
+<div>
+  <h1>a title</h1>
+  <pre>
+    <code>and such</code>
+  </pre>
+  <p>testing</p>
+</div>
+```
+
+## createElement
+
+使用新方法，上述 MDX 转换为这个新的 React 代码
+
+```tsx
+const layoutProps = {}
+export default function MDXContent({components, ...props}) {
+  return (
+    <MDXLayout
+      {...layoutProps}
+      {...props}
+      components={components}
+      mdxType="MDXLayout"
+    >
+      <h1>{`a title`}</h1>
+      <pre>
+        <code parentName="pre" {...{}}>{`and such
+`}</code>
+      </pre>
+      <p>{`testing`}</p>
+    </MDXLayout>
+  )
+}
+
+MDXContent.isMDXComponent = true
+```
+
+注意现在 React 元素可以直接阅读，不再包裹 `MDXTag`。
+
+现在我们清理了中间表示，需要确保具有与旧 `MDXTag` 相同的功能。
+这是通过自定义 `createElement` 实现来完成的。
+通常使用 React 时，我们使用 `React.createElement` 来渲染屏幕上的元素。
+即使你使用 JSX 也是如此，因为像 `<div>` 这样的 JSX 标签会编译为
+`createElement` 调用。
+所以这次我们不再使用 `React.createElement`，而是使用我们自己的。
+
+这里重现了我们的 `createElement` 函数以及我们如何决定
+MDX 是否应该接管 `createElement` 调用的渲染逻辑。
+
+```tsx
+export default function (type, props) {
+  const args = arguments
+  const mdxType = props && props.mdxType
+
+  if (typeof type === 'string' || mdxType) {
+    const argsLength = args.length
+
+    const createElementArgArray = new Array(argsLength)
+    createElementArgArray[0] = MDXCreateElement
+
+    const newProps = {}
+    for (let key in props) {
+      if (hasOwnProperty.call(props, key)) {
+        newProps[key] = props[key]
+      }
+    }
+    newProps.originalType = type
+    newProps[TYPE_PROP_NAME] = typeof type === 'string' ? type : mdxType
+
+    createElementArgArray[1] = newProps
+
+    for (let i = 2; i < argsLength; i++) {
+      createElementArgArray[i] = args[i]
+    }
+
+    return React.createElement.apply(null, createElementArgArray)
+  }
+
+  return React.createElement.apply(null, args)
+}
+```
+
+## Vue
+
+使用自定义 `createElement` 的新输出格式的一个很酷的应用是，
+我们现在可以为 Vue 和其他框架编写它的版本。
+由于 pragma 插入是 webpack（或其他打包器）加载器的责任，
+只要我们有一个 Vue `createElement` 可以指向，在 mdx-loader 中
+切换 pragma 可以作为一个选项。

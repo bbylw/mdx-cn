@@ -1,0 +1,117 @@
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2021-10-06')
+}
+export const navSortSelf = 2
+
+# Frontmatter
+
+本指南探讨了如何在 MDX 中支持 YAML frontmatter。 {/* more */}
+MDX 支持标准 Markdown 语法（[CommonMark][]）。
+这意味着 frontmatter 默认不受支持。
+
+MDX 提供了一个强大且动态的 frontmatter 替代方案，即 ESM
+（`import`/`export`）。
+这些导出：
+
+```mdx path="example.mdx"
+export const name = 'World'
+export const title = 'Hi, ' + name + '!'
+
+# {title}
+```
+
+可以这样使用：
+
+```js twoslash path="example.js"
+// @filename: types.d.ts
+declare module '*.mdx' {
+  export {MDXContent as default} from 'mdx/types'
+  export const name: string
+  export const title: string
+}
+// @filename: example.js
+/// <reference types="node" />
+// ---cut---
+import * as Post from './example.mdx' // Assumes an integration is used to compile MDX -> JS.
+
+console.log(Post.title) // Prints 'Hi, World!'
+```
+
+不过你可能更喜欢 frontmatter，因为它允许你定义可以在编译*之前*从文件系统中提取的数据。
+假设我们的带 frontmatter 的 MDX 看起来像这样：
+
+```mdx path="example.mdx"
+---
+title: Hi, World!
+---
+
+# Hi, World!
+```
+
+那么不编译或求值，元数据可以这样访问：
+
+```js twoslash path="example.js"
+/// <reference types="node" />
+// ---cut---
+import {read} from 'to-vfile'
+import {matter} from 'vfile-matter'
+
+const file = await read('example.mdx')
+matter(file)
+
+console.log(file.data.matter)
+```
+
+我们的编译器 `@mdx-js/mdx` 默认不理解 YAML frontmatter，但
+可以通过 remark 插件
+[`remark-frontmatter`][remark-frontmatter] 来启用：
+
+```js twoslash path="example.js"
+// @filename: example.js
+/// <reference types="node" />
+// ---cut---
+import fs from 'node:fs/promises'
+import {compile} from '@mdx-js/mdx'
+import remarkFrontmatter from 'remark-frontmatter'
+
+const file = await compile(await fs.readFile('example.mdx'), {
+  remarkPlugins: [remarkFrontmatter]
+})
+
+console.log(file)
+```
+
+现在它"可以用了"。
+frontmatter 不会像 Markdown 那样被渲染。
+但嵌入在 frontmatter 中的数据不能从 MDX *内部*访问。
+如果我们也想要那个呢？
+像这样：
+
+```mdx path="example.mdx"
+---
+title: Hi, World!
+---
+
+# {title}
+```
+
+这正是 remark 插件
+[`remark-mdx-frontmatter`][remark-mdx-frontmatter] 所做的。
+
+该插件与所有 remark 插件一样，可以作为
+[`ProcessorOptions` 中的 `remarkPlugins`][processor-options] 传递。
+有关插件的更多信息请参见[§ 扩展 MDX][extend]
+
+[commonmark]: https://spec.commonmark.org/current/
+
+[extend]: /docs/extending-mdx/
+
+[processor-options]: /packages/mdx/#processoroptions
+
+[remark-frontmatter]: https://github.com/remarkjs/remark-frontmatter
+
+[remark-mdx-frontmatter]: https://github.com/remcohaszing/remark-mdx-frontmatter

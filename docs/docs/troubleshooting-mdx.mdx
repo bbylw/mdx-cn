@@ -1,0 +1,536 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2021-10-18')
+}
+export const navSortSelf = 5
+
+{/* lint disable maximum-heading-length */}
+
+<Note type="info">
+  **注意**：遇到了这里没有解释但应该解释的问题？
+  请告诉我们。
+  参见[§ 贡献][contribute]了解如何帮助。
+</Note>
+
+# MDX 故障排除
+
+本文介绍了一些在使用 MDX 时可能遇到的常见问题和错误。 {/* more */}
+要了解 MDX 格式的工作原理，我们建议你先阅读
+[§ 什么是 MDX][what]。
+如何使用[我们的包][packages]在它们的 readme 中有文档说明。
+要迁移到最新的 MDX，请参见[§ 从 v1 迁移到 v2][migation-v2]。
+
+## 目录
+
+* [集成 MDX 的问题](#problems-integrating-mdx)
+  * [ESM](#esm)
+* [使用 MDX 的问题](#problems-using-mdx)
+  * [`` `options.renderer` is no longer supported ``](#optionsrenderer-is-no-longer-supported)
+  * [`` Incorrect `format: 'detect'` ``](#incorrect-format-detect)
+  * [`` Unexpected `format: 'detect'` ``](#unexpected-format-detect)
+  * [`` Missing `pragma` in classic runtime with `pragmaImportSource` ``](#missing-pragma-in-classic-runtime-with-pragmaimportsource)
+  * [`` Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource` ``](#unexpected-deprecated-option-jsxruntime-classic-pragma-pragmafrag-or-pragmaimportsource)
+  * [`` Expected `Fragment` given to `evaluate` ``](#expected-fragment-given-to-evaluate)
+  * [`` Expected `jsx` given to `evaluate` ``](#expected-jsx-given-to-evaluate)
+  * [`` Expected `jsxs` given to `evaluate` ``](#expected-jsxs-given-to-evaluate)
+  * [``Unexpected missing `options.baseUrl` needed…``](#unexpected-missing-optionsbaseurl-needed)
+* [编写 MDX 的问题](#problems-writing-mdx)
+  * [`Could not parse import/exports with acorn: $error`](#could-not-parse-importexports-with-acorn-error)
+  * [``Unexpected `$type` in code: only import/exports are supported``](#unexpected-type-in-code-only-importexports-are-supported)
+  * [`` Unexpected end of file in expression, expected a corresponding closing brace for `{` ``](#unexpected-end-of-file-in-expression-expected-a-corresponding-closing-brace-for-)
+  * [`Unexpected lazy line in expression in container`](#unexpected-lazy-line-in-expression-in-container)
+  * [`Could not parse expression with acorn: $error`](#could-not-parse-expression-with-acorn-error)
+  * [`Could not parse expression with acorn: Unexpected content after expression`](#could-not-parse-expression-with-acorn-unexpected-content-after-expression)
+  * [`Unexpected extra content in spread: only a single spread is supported`](#unexpected-extra-content-in-spread-only-a-single-spread-is-supported)
+  * [``Unexpected `$type` in code: only spread elements are supported``](#unexpected-type-in-code-only-spread-elements-are-supported)
+  * [`Unexpected empty expression`](#unexpected-empty-expression)
+  * [`Unexpected end of file $at, expected $expect`](#unexpected-end-of-file-at-expected-expect)
+  * [`Unexpected character $at, expected $expect`](#unexpected-character-at-expected-expect)
+  * [``Unexpected closing slash `/` in tag, expected an open tag first``](#unexpected-closing-slash--in-tag-expected-an-open-tag-first)
+  * [`Unexpected lazy line in container, expected line to be…`](#unexpected-lazy-line-in-container-expected-line-to-be)
+  * [`Unexpected attribute in closing tag, expected the end of the tag`](#unexpected-attribute-in-closing-tag-expected-the-end-of-the-tag)
+  * [``Unexpected self-closing slash `/` in closing tag, expected the end of the tag``](#unexpected-self-closing-slash--in-closing-tag-expected-the-end-of-the-tag)
+  * [``Unexpected closing tag `</$tag>`, expected corresponding closing tag for `<$tag>` ($at)``](#unexpected-closing-tag-tag-expected-corresponding-closing-tag-for-tag-at)
+  * [``Cannot close `$type` ($at): a different token (`$type`, $at) is open``](#cannot-close-type-at-a-different-token-type-at-is-open)
+  * [``Cannot close document, a token (`$type`, $at) is still open``](#cannot-close-document-a-token-type-at-is-still-open)
+
+## 集成 MDX 的问题
+
+### ESM
+
+如果你在将 MDX 与不同工具集成时遇到问题，那很可能
+是 ESM（ECMAScript 模块）的问题。
+它们从 2015 年就在开发中了，我们从一开始就在 MDX 文件中支持它们，
+在 MDX 版本 2 中我们完全切换到了它们。
+许多工具已经支持 ESM。
+大多数其他工具正在努力支持它们。
+一些仍然需要额外配置。
+
+[**@sindresorhus** 的一个 Gist](https://gist.github.com/sindresorhus/a39789f98801d908bbc7ff3ecc99d99c)
+详细解释了如何在许多不同工具中使用 ESM。
+如果你在使用 MDX、其他工具和 ESM 时遇到问题，
+你很可能会在那里找到答案。
+请仔细阅读。
+如果仍然有问题，你正在集成 MDX 的工具的 issue 跟踪器可能
+提供答案。
+
+如果你在使用不支持 ESM 的工具（如 Electron）时遇到问题，
+一个短期解决方案是使用打包器制作 CJS 版本。
+
+<details>
+  <summary>展开制作 CJS 包的示例</summary>
+
+  使用 [esbuild](https://esbuild.github.io)，将 ESM 包
+  `@mdx-js/mdx` 打包为 CJS 到 `vendor/mdx.js`：
+
+  ```sh
+  npx esbuild @mdx-js/mdx --bundle --platform=node --outfile=vendor/mdx.js
+  ```
+</details>
+
+## 使用 MDX 的问题
+
+使用 MDX 时出现的问题通常与
+[我们的包][packages]的 API 及如何使用它们有关。
+请参见你正在使用的包、函数和选项的文档，获取更多信息和示例。
+
+### `` `options.renderer` is no longer supported ``
+
+此错误由 [`@mdx-js/loader`][loader] 抛出，
+即我们的 webpack loader。
+它在版本 2 中引入以帮助迁移。
+
+`renderer` 选项允许在每个编译的 MDX 文件之前注入任意文本。
+这通常用于支持 React 以外的框架，如 Preact。
+我们现在有 `jsxImportSource` 等选项来实现这一点，可以通过 `recmaPlugins`
+添加任意 JavaScript。
+因为版本 2 使用基于 AST 的方法，不再可行支持 `renderer`，
+所以它被移除了。
+
+请参见[¶ 快速开始中的 Preact](/docs/getting-started/#preact)了解
+如何支持 Preact。
+参见[§ 扩展 MDX 中的创建插件](/docs/extending-mdx/#creating-plugins)
+了解如何创建插件。
+
+### `` Incorrect `format: 'detect'` ``
+
+### `` Unexpected `format: 'detect'` ``
+
+MDX 2 中的完整错误信息如下：
+
+```mdx-invalid chrome=no
+Incorrect `format: 'detect'`: `createProcessor` can support either `md` or `mdx`; it does not support detecting the format
+```
+
+MDX 3 中的完整错误信息是：
+
+```mdx-invalid chrome=no
+Unexpected `format: 'detect'`, which is not supported by `createProcessor`, expected `'mdx'` or `'md'`
+```
+
+此错误由 [`@mdx-js/mdx`][mdx] 抛出，即我们的核心编译器。
+它在版本 2 中引入 `format` 选项时引入。
+
+`format` 选项配置为 `'detect'` 时，允许推断文件是 MDX 还是
+纯 Markdown。
+基于该信息，插件会以不同方式配置，并使用
+不同的选项。
+这在 `createProcessor` 和 `unified` 中是不可能的。
+
+要检测传入文件的格式，请使用 `@mdx-js/mdx` 的 `compile` 或
+其中一个集成。
+
+### `` Missing `pragma` in classic runtime with `pragmaImportSource` ``
+
+此错误由 [`@mdx-js/mdx`][mdx] 抛出，即我们的核心编译器。
+它在版本 2 中引入 `jsxRuntime`、`pragma` 和
+`pragmaImportSource` 选项时引入。
+
+当 `jsxRuntime` 配置为 `'classic'`（默认是 `'automatic'`）、
+`pragmaImportSource` 已定义（默认是 `'react'`），
+但 `pragma` 定义为假值（默认是 `React.createElement`）时抛出此错误。
+
+如果你使用经典运行时，你必须定义一个 `pragma`。
+
+### `` Unexpected deprecated option `jsxRuntime: 'classic'`, `pragma`, `pragmaFrag`, or `pragmaImportSource` ``
+
+这是一个警告。
+它不是错误。
+你可以继续使用这些选项，但预计它们在未来会被移除。
+
+所有主要框架目前都支持自动 JSX 运行时。
+经典运行时从 MDX 的角度来看有多个潜在问题。
+
+因此，我们强烈建议使用自动 JSX 运行时，并
+正在考虑移除对经典 JSX 运行时的支持。
+
+### `` Expected `Fragment` given to `evaluate` ``
+
+### `` Expected `jsx` given to `evaluate` ``
+
+### `` Expected `jsxs` given to `evaluate` ``
+
+这些错误由 [`@mdx-js/mdx`][loader] 抛出，
+即我们的核心编译器。
+它们在版本 2 中引入 `evaluate`（和 `evaluateSync`）时引入。
+
+`evaluate` 支持 React 和其他框架。
+但这些框架必须支持暴露这三个导出的自动 JSX 运行时。
+如果你收到此错误，意味着要么 a) 框架不支持自动 JSX 运行时，要么 b) 你没有正确传递它们
+给 `evaluate`。
+
+请参见 [`@mdx-js/mdx` 中的 `evaluate`](/packages/mdx/#evaluatefile-options)
+了解如何传递这些值的示例。
+
+### ``Unexpected missing `options.baseUrl` needed…``
+
+MDX 中的完整错误信息如下：
+
+```mdx-invalid chrome=no
+Unexpected missing `options.baseUrl` needed to support `export … from`, `import`, or `import.meta.url` when generating `function-body`
+```
+
+当 MDX 运行时，特别是使用 `evaluate` 编译，或使用 `outputFormat: 'function-body'` 选项稍后求值，
+并且使用了 `import.meta.url`、`import` 或 `export … from` 时抛出此错误。
+这些 JavaScript 特性依赖于特定的 URL 来运行，当运行函数体时
+不可用或不正确。
+要解决此问题，传递一个 `baseUrl` 选项。
+可能设置为 `import.meta.url`（或 `window.location.href`）。
+
+## 编写 MDX 的问题
+
+编写 MDX 时出现的问题通常与如何组合
+JS(X) 和 Markdown 有关。
+这是两种语言的奇妙混合：Markdown 是**对空白敏感的**和
+**宽容的**（你输入的可能不完全有效但不会崩溃），而 JavaScript 是
+**对空白不敏感的**和**不宽容的**（它会在拼写错误时崩溃）。
+
+错误通常分为以下三类：
+
+* **未转义 `<` 和 `{`**
+  — 如果你想将它们作为纯文本而不是 JS(X) 使用，请转义它们（`\<`、`\{`）
+* **不正确的交错**
+  — 参见
+  [§ 什么是 MDX 中的交错规则][interleaving]
+* **损坏的 JavaScript**
+  — 确保你编写的 JavaScript 是有效的
+
+### `Could not parse import/exports with acorn: $error`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当 `import` 或 `export` 关键字出现在行首但后面没有
+有效的 JavaScript 时发生。
+例如：
+
+```mdx-invalid chrome=no
+import 1/1
+```
+
+此错误的原因是解析器期望一个 JavaScript import 或
+export 语句。
+如果你想要 import 或 export 这个词，确保它不在段落的开头。
+如果你确实想要一个 import 或 export 语句，请确保它是有效的
+JavaScript。
+
+### ``Unexpected `$type` in code: only import/exports are supported``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当在 `import` 或 `export` 语句之后找到更多 JavaScript 时
+发生。
+例如：
+
+```mdx-invalid chrome=no
+export const a = 1
+const b = 2
+```
+
+此错误的原因是我们只允许 `import` 和 `export` 来定义
+数据。
+如果你想定义一个变量或函数，请导出它。
+
+### `` Unexpected end of file in expression, expected a corresponding closing brace for `{` ``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当有一个左花括号但没有右花括号时发生。
+例如：
+
+```mdx-invalid chrome=no
+a { b
+```
+
+此错误的原因是解析器期望另一个花括号。
+如果你只想要花括号而不是表达式，请转义它：`\{`。
+如果你确实想要一个表达式，请确保用右花括号
+`}` 闭合它。
+如果某处有右花括号，确保花括号各自在
+单独的行上，左花括号前没有文本，右花括号后没有文本，
+或者花括号之间没有空行。
+
+### `Unexpected lazy line in expression in container`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 3 中引入。
+当带有惰性行的容器与表达式结合时发生
+例如：
+
+```mdx-invalid chrome=no
+* {1 +
+2}
+
+> {1 +
+2}
+```
+
+此错误的原因是解析器可能指向一个 bug。
+请明确你的列表项和引用块：
+
+```mdx-invalid chrome=no
+* {1 +
+  2}
+
+> {1 +
+> 2}
+```
+
+### `Could not parse expression with acorn: $error`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当有匹配的花括号，但将其中内容解释为 JavaScript 时
+导致语法错误时发生。
+例如：
+
+```mdx-invalid chrome=no
+a {const b = 'c'} d
+```
+
+另一个例子：
+
+```mdx-invalid chrome=no
+a {!} d
+```
+
+此错误的原因是解析器期望一个 JavaScript
+表达式。
+如果你只想要花括号而不是表达式，请转义左花括号：`\{`。
+如果你确实想要一个表达式，请确保它是有效的 JavaScript 并且它
+是一个表达式。
+这意味着语句（如 `if` 和 `else` 以及 `for` 循环）不起作用。
+如果你需要复杂逻辑，你可以将语句和整个程序包裹在
+IIFE 中，或将其移到不同的文件中，从那里导出，然后在
+MDX 中导入。
+
+### `Could not parse expression with acorn: Unexpected content after expression`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当有匹配的花括号，里面有有效的 JavaScript，但 JavaScript 太多时
+发生。
+例如：
+
+```mdx-invalid chrome=no
+a {'b' 'c'} d
+```
+
+此错误的原因是解析器期望一个产生单个值的 JavaScript
+表达式。
+如果你只想要花括号而不是表达式，请转义左花括号：`\{`。
+如果你确实想要一个表达式，请确保它产生单个值。
+
+### `Unexpected extra content in spread: only a single spread is supported`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当多个值展开到 JSX 标签中时发生。
+例如：
+
+```mdx-invalid chrome=no
+<div {...a, ...b} />
+```
+
+此错误的原因是 JSX 只允许一次展开单个值：
+
+```mdx chrome=no
+<div {...a} {...b} />
+```
+
+### ``Unexpected `$type` in code: only spread elements are supported``
+
+### `Unexpected empty expression`
+
+这些错误由我们的 MDX 解析器抛出。
+它们在版本 2 中引入。
+当花括号中使用了除展开以外的其他内容时发生。
+例如：
+
+```mdx-invalid chrome=no
+<div {values} {/* comment */} {} />
+```
+
+此错误的原因是 JSX 只允许展开值：
+
+```mdx chrome=no
+<div {...a} />
+```
+
+### `Unexpected end of file $at, expected $expect`
+
+### `Unexpected character $at, expected $expect`
+
+这些错误由我们的 MDX 解析器抛出。
+它们在 MDX 版本 2 中引入。
+当在 JSX 标签中找到意外内容时发生。
+一些例子：
+
+```mdx-invalid chrome=no
+<
+<.>
+</
+</.>
+<a
+<a?>
+<a:
+<a:+>
+<a.
+<a./>
+<a b
+<a b!>
+<a b:
+<a b:1>
+<a b=
+<a b=>
+<a b="
+<a b='
+<a b={
+<a/
+<a/->
+```
+
+这些错误的原因是 JSX 有一个非常严格的语法，期望
+标签是有效的。
+有不同的解决方案取决于期望的是什么。
+请仔细阅读错误信息，因为它指出了问题发生的位置和期望的内容。
+
+### ``Unexpected closing slash `/` in tag, expected an open tag first``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当找到结束标签但没有开始标签时发生。
+例如：
+
+```mdx-invalid chrome=no
+</div>
+```
+
+此错误的原因是只有开始标签可以被关闭。
+你可能忘记了某处的开始标签。
+
+### `Unexpected lazy line in container, expected line to be…`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 3 中引入。
+当带有惰性行的容器与 JSX 结合时发生。
+例如：
+
+```mdx-invalid chrome=no
+* <x
+y />
+
+> <x
+y />
+```
+
+此错误的原因是解析器可能指向一个 bug。
+请明确你的列表项和引用块：
+
+```mdx-invalid chrome=no
+* <x
+  y />
+
+> <x
+> y />
+```
+
+### `Unexpected attribute in closing tag, expected the end of the tag`
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当属性放在结束标签上时发生。
+例如：
+
+```mdx-invalid chrome=no
+<h1>Text</h1 id="text">
+```
+
+此错误的原因是只有开始标签可以有属性。
+将这些属性移到相应的开始标签。
+
+### ``Unexpected self-closing slash `/` in closing tag, expected the end of the tag``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当结束标签也被标记为自闭合时发生。
+例如：
+
+```mdx-invalid chrome=no
+<h1>Text</h1/>
+```
+
+此错误的原因是只有开始标签可以被标记为
+自闭合。
+移除标签名后和 `>` 前的斜杠。
+
+### ``Unexpected closing tag `</$tag>`, expected corresponding closing tag for `<$tag>` ($at)``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+当看到的结束标签与期望的开始标签不匹配时
+发生。
+例如：
+
+```mdx-invalid chrome=no
+<a>Text</b>
+```
+
+此错误的原因是标签在 JSX 中必须匹配。
+你可能忘记正确打开或关闭其中一个。
+
+### ``Cannot close `$type` ($at): a different token (`$type`, $at) is open``
+
+### ``Cannot close document, a token (`$type`, $at) is still open``
+
+此错误由我们的 MDX 解析器抛出。
+它在版本 2 中引入。
+通常在 Markdown 和 JSX 没有正确交错时发生。
+例如：
+
+```mdx-invalid chrome=no
+> <div>
+```
+
+此错误的原因是 Markdown 结构在仍有
+标签打开时结束。
+参见
+[§ 什么是 MDX 中的交错规则][interleaving]
+
+[contribute]: /community/contribute/
+
+[interleaving]: /docs/what-is-mdx/#interleaving
+
+[loader]: /packages/loader/
+
+[mdx]: /packages/mdx/
+
+[migation-v2]: /migrating/v2/
+
+[packages]: /packages/
+
+[what]: /docs/what-is-mdx/

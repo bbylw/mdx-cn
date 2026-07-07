@@ -1,0 +1,129 @@
+import {Note} from '../_component/note.jsx'
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2023-10-24')
+}
+
+<Note type="info">
+  **注意**：有关如何迁移的信息，请参阅我们的
+  [版本 3 迁移指南][migrating]。
+</Note>
+
+# MDX 3
+
+版本 3 来了！
+这个主版本包含了一些小的变更。
+对于大多数人来说，只需要更新 Node.js 和插件即可！
+
+{/* more */}
+
+## 目录
+
+* [破坏性变更](#breaking-changes)
+* [MDX 格式的改进](#improvements-to-the-mdx-format)
+  * [MDX 中相邻的块级 JSX 和表达式](#adjacent-block-jsx-and-expressions-in-mdx)
+  * [MDX 中的 await](#await-in-mdx)
+  * [MDX 中的 ES2024](#es2024-in-mdx)
+* [其他](#miscellaneous)
+* [致谢](#thanks)
+
+## 破坏性变更
+
+主要的破坏性变更是 Node.js 16 现在是最低支持的版本。
+
+在整个生态系统中，有几个小的内部破坏性变更。
+所有内容都已经发布了。
+你现在可以更新所有插件。
+如果你之前遇到了问题，现在应该可以正常工作了。
+
+我们还移除了一些不常用的已废弃 API。
+你可能不会受到影响，但如果遇到错误，请查看
+[v3 迁移指南][migrating]。
+
+需要注意的是，当你使用不太知名但强大的 `evaluate`、`run`
+或 `outputFormat: 'function-body'` API 时，请传递 `baseUrl` 选项。
+这样可以确保 `import.meta.url`、`import` 和 `export` 正常工作。
+否则，当使用这些功能时会收到运行时错误。
+
+## MDX 格式的改进
+
+MDX 格式还有一些小的改进，其中一些在技术上是破坏性的。
+
+### MDX 中相邻的块级 JSX 和表达式
+
+我们现在接受块级表达式紧挨着块级 JSX 标签：
+
+```mdx chrome=no
+<style>{`
+
+  h1 {
+    color: blue;
+  }
+
+`}</style>
+```
+
+以前这会产生语法错误，你必须在尖括号和花括号之间添加换行符。
+
+### MDX 中的 await
+
+我们现在接受 `await` 语法：
+
+```mdx
+{await Promise.resolve(42)}
+```
+
+大多数框架不支持 Promise。
+这是否有效取决于框架本身。
+
+以前，当在不允许的上下文中使用 `await` 时会产生运行时错误。
+
+### MDX 中的 ES2024
+
+你现在可以在 MDX 中使用现代 JavaScript 语法。
+内部使用的 Acorn 现在被指示使用 ES2024。
+
+## 其他
+
+我重构了所有文档。
+根据需要更新了每个使用示例。
+我还写了一篇关于如何从任何地方注入组件的指南：
+[§ 注入组件][injecting-components]。
+
+网站速度快了很多。
+还有一个改进的 playground：[试试看！»][playground]。
+我们还在这里有了正确的语法高亮，感谢
+[`wooorm/markdown-tm-language`][markdown-tm-language]
+和 [`wooorm/starry-night`][starry-night]。
+
+生成的 JS 代码更干净了（移除了 JSX pragma 注释，并在需要时对对象
+进行排序），还使用了展开运算符代替 `Object.assign`，在需要时添加了
+`'use strict'`，并且 `MDXContent` 被立即导出。
+
+## 致谢
+
+我们要感谢所有的贡献者和开心的用户。
+特别感谢
+北雁云依 ([**@BeiyanYunyi**](https://github.com/BeiyanYunyi)),
+Christian Murphy ([**@ChristianMurphy**](https://github.com/ChristianMurphy)),
+JokcyLou ([**@Jokcy**](https://github.com/Jokcy)),
+Maël Nison ([**@arcanis**](https://github.com/arcanis)),
+Andreas Deininger ([**@deining**](https://github.com/deining)),
+Remco Haszing ([**@remcohaszing**](https://github.com/remcohaszing)),
+Sébastien Lorber ([**@slorber**](https://github.com/slorber)),
+Víctor Fernández ([**@victor23k**](https://github.com/victor23k)),
+Titus Wormer ([**@wooorm**](https://github.com/wooorm)),
+以及任何我们可能遗漏的人。
+
+[injecting-components]: /guides/injecting-components/
+
+[markdown-tm-language]: https://github.com/wooorm/markdown-tm-language
+
+[migrating]: /migrating/v3/
+
+[playground]: /playground/
+
+[starry-night]: https://github.com/wooorm/starry-night

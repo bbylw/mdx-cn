@@ -1,0 +1,347 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'johno', name: 'John Otander'},
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2018-08-11')
+}
+export const navSortSelf = 1
+
+# 什么是 MDX？
+
+本文解释了 MDX 格式是什么。
+它展示了如何在 MDX 中使用 Markdown、JSX、JavaScript 表达式，以及 ESM 中的 `import` 和
+`export` 语句。 {/* more */}
+有关如何将 MDX 集成到你的项目中的详细信息，请参见[§ 快速开始][start]。
+如果你已经配置好并准备使用 MDX，请参见[§ 使用 MDX][use]。
+
+## 目录
+
+* [前置条件](#prerequisites)
+* [面向组件时代的 Markdown](#markdown-for-the-component-era)
+* [MDX 语法](#mdx-syntax)
+  * [Markdown](#markdown)
+  * [JSX](#jsx)
+  * [表达式](#expressions)
+  * [ESM](#esm)
+  * [交错](#interleaving)
+* [延伸阅读](#further-reading)
+
+## 前置条件
+
+要编写和享受 MDX，你应该熟悉 Markdown
+（参见这个[速查表和教程][commonmark-help]获取帮助）和
+JavaScript（特别是 [JSX][jsx-spec]）。
+
+## 面向组件时代的 Markdown
+
+MDX 允许你在 Markdown 内容中使用 JSX。
+你可以导入组件，例如交互式图表或提示框，并将它们嵌入到内容中。
+这让使用组件编写长篇内容变得非常轻松。
+🚀
+
+
+更具体地说，MDX 可以解释为一种将 Markdown 与 JSX 结合的格式，看起来如下：
+
+```mdx
+# Hello, world!
+
+<div className="note">
+  > 引用块中的一些值得注意的内容！
+</div>
+```
+
+标题和引用块是 Markdown，而那些*类似 HTML 的标签*是 JSX。
+对于常见的内容如强调或标题，Markdown 通常比 HTML 或 JSX 更自然地书写。
+JSX 是 JavaScript 的扩展，它*看起来*像 HTML，但使使用组件（可复用的东西）变得方便。
+
+这个例子在 `<div>` 上使用了 `className`。
+那是因为它是为 React 编写的，React 期望以这种方式定义类。
+其他框架，如 Vue 和 Preact，期望以不同的方式定义类，
+所以请注意，根据使用的工具不同，JSX 的编写方式会有一些差异。
+
+JavaScript 的一些其他特性也在 MDX 中得到了支持：花括号中的表达式
+（`{1 + 1}`）和 ESM（`import` 和 `export`）。
+
+## MDX 语法
+
+<Note type="info">
+  **注意**：
+  你不必使用 `@mdx-js/*` 包来使用这种语法。
+  也不必总是使用它。
+  如果你使用打包器集成，你可以通过文件扩展名（`.mdx` vs. `.md`）在 MDX 和
+  Markdown 之间切换。
+  或者，可以使用 `options.format`。
+</Note>
+
+MDX 语法将 Markdown 与 JSX 结合。
+这给我们带来了一些类似于文学编程的东西。
+它也给我们带来了两种语言的奇妙混合：Markdown 是**对空白敏感的**和
+**宽容的**（你输入的可能不完全有效但不会崩溃），而 JavaScript 是
+**对空白不敏感的**和**不宽容的**（它会在拼写错误时崩溃）。
+
+奇怪的是，我们非常喜欢它们的结合！
+
+### Markdown
+
+对于常见的内容如强调或标题，Markdown 通常比 HTML 或 JSX 更自然地书写。
+Markdown 通常看起来更像意图表达的内容，也更简洁。
+与以下 HTML 相比：
+
+```html
+<blockquote>
+  <p>A blockquote with <em>some</em> emphasis.</p>
+</blockquote>
+```
+
+你可以用 Markdown（或 MDX）这样写等价的内容：
+
+```md
+> A blockquote with *some* emphasis.
+```
+
+MDX 默认支持标准 Markdown（[CommonMark][]）：
+
+````md
+# 标题 (rank 1)
+## 标题 2
+### 3
+#### 4
+##### 5
+###### 6
+
+> 引用块
+
+* 无序列表
+* 列表
+
+1. 有序列表
+2. 列表
+
+一个段落，引出一个分隔线：
+
+---
+
+```js
+some.code()
+```
+
+一个 [链接](https://example.com)，一个 ![图片](./image.png)，一些*强调*，
+一些**粗体**，最后是一点 `code()`。
+````
+
+非标准 Markdown 特性（如 GFM、frontmatter、数学公式、语法高亮）可以通过插件启用
+（参见[¶ 使用插件][using-plugins]）。
+
+一些 Markdown 特性在 MDX 中不起作用：
+
+* 缩进代码在 MDX 中不起作用：
+  ```mdx
+      console.log(1) // 这在 MDX 中是一个段落！
+  ```
+  原因是这样你可以优雅地缩进你的组件：
+  ```mdx
+  <main>
+    <article>
+      # Hello!
+    </article>
+  </main>
+  ```
+* 自动链接在 MDX 中不起作用。
+  原因是它们可能与 JSX 无法区分（例如：
+  `<svg:rect>`），我们更倾向于明确表达。
+  如果你想要链接，请使用完整链接：
+  `[描述文字](https://和链接地址.com)`
+* HTML 语法在 MDX 中不起作用，因为它被 JSX 替代了（`<img>` 变为
+  `<img />`）。
+  你可以在花括号中使用 JavaScript 注释代替 HTML 注释：
+  `{/* comment! */}`
+* 未转义的左尖括号/小于号（`<`）和左花括号（`{`）
+  必须转义：`\<` 或 `\{`（或使用表达式：`{'<'}`, `{'{'}`）
+
+更多关于 MDX 与 Markdown 的差异请
+[参见此处](https://github.com/micromark/mdx-state-machine#72-deviations-from-markdown)。
+
+### JSX
+
+[JSX][] 是 JavaScript 的扩展，它*看起来*像 HTML，但使使用组件（可复用的东西）变得方便。
+JSX 通常与 React、Preact 或 Vue 等前端框架结合使用。
+这些框架添加了对组件的支持，让你可以改变重复的内容，如以下标记：
+
+```html
+<h2>Hello, Venus!</h2>
+<h2>Hello, Mars!</h2>
+```
+
+…变为这样的 JSX（或 MDX）：
+
+```mdx
+<Welcome name="Venus" />
+<Welcome name="Mars" />
+```
+
+JSX 非常适合**组件**。
+它让重复的内容更清晰，并允许关注点分离。
+MDX 支持 JSX 语法。
+以下内容看起来很像 HTML：
+
+```mdx
+<h1>标题！</h1>
+
+<abbr title="HyperText Markup Language">HTML</abbr> 是一门可爱的语言。
+
+<section>
+  这里是 *markdown* 在 **JSX** 中！
+</section>
+```
+
+但如前所述，你也可以使用组件。
+请注意，组件必须被定义。
+你可以导入它们、在本地定义，或稍后传入（参见
+[§ 使用 MDX][use]）：
+
+```mdx
+<MyComponent id="123" />
+
+你也可以使用带有组件的对象，例如 `myComponents` 对象上的
+`thisOne` 组件：<myComponents.thisOne />
+
+<Component
+  open
+  x={1}
+  label={'这是一个字符串，*不是* markdown！'}
+  icon={<Icon />}
+/>
+```
+
+有一些边缘情况
+[MDX 与 JSX 的差异](https://github.com/micromark/mdx-state-machine#73-deviations-from-jsx)。
+
+### 表达式
+
+MDX 还支持花括号中的 JavaScript 表达式：
+
+```mdx
+两个 🍰 是：{Math.PI * 2}
+```
+
+表达式可以包含完整的 JavaScript 程序，只要它们（被包裹在）一个可以求值为可渲染内容的表达式中。
+你可以像这样使用 [IIFE][]：
+
+```mdx
+{(function () {
+  const guess = Math.random()
+
+  if (guess > 0.66) {
+    return <span style={{color: 'tomato'}}>看看我们。</span>
+  }
+
+  if (guess > 0.33) {
+    return <span style={{color: 'violet'}}>谁能猜到呢？！</span>
+  }
+
+  return <span style={{color: 'goldenrod'}}>不是我。</span>
+})()}
+```
+
+表达式可以为空或只包含注释：
+
+```mdx
+{/* 一个注释！ */}
+```
+
+### ESM
+
+MDX 也支持 JavaScript 的 `import` 和 `export` 语句。
+这些 ESM 特性可以在 MDX 中用于定义内容：
+
+```mdx
+import {External} from './some/place.js'
+
+export const Local = properties => <span style={{color: 'red'}} {...properties} />
+
+一个 <External>外部</External> 组件和一个 <Local>本地</Local> 组件。
+```
+
+ESM 也可用于非组件（数据）：
+
+```mdx
+import {Chart} from './chart.js'
+import population from './population.js'
+export const pi = 3.14
+
+<Chart data={population} label={'Something with ' + pi} />
+```
+
+### 交错
+
+如果文本和标签在同一行，你可以在 JSX 中使用 Markdown "行内"内容但不能使用"块级"内容：
+
+```mdx
+<div># 这不是标题但 *这个* 是强调</div>
+```
+
+同一行上的文本和标签不会产生块级元素，因此也不会产生 `<p>`。
+在不同行上，它们会：
+
+```mdx
+<div>
+  这是一个 `p`。
+</div>
+```
+
+我们使用以下规则来区分（是否在同一行）。
+不是基于 HTML 中元素的语义。
+所以你*可以*构建不正确的 HTML（你不应该这样做）：
+
+```mdx
+<h1 className="main">
+  不要这样做：这是 `h1` 中的 `p`
+</h1>
+
+<h1 className="main">这样做：带 `code` 的 `h1`</h1>
+```
+
+如果文本和标签在同一行但对应的开始和结束标签在不同块中，则无法包裹"块级"内容
+（所以这是无效的！）：
+
+```mdx-invalid chrome=no
+欢迎！ <a href="about.html">
+
+这里是...
+
+# The Falcons!</a>
+```
+
+要解析 Markdown，我们首先必须将其划分为"块"。
+所以在这种情况下是两个段落和一个标题。
+在第一个段落中留下一个开始的 `a` 标签，在标题中留下一个结束的 `a` 标签。
+这会导致错误，因为嵌套不正确。
+
+## 延伸阅读
+
+* 如果你想在项目中使用 MDX，请参见[§ 快速开始][start]；
+  如果你已经配置好了，请参见[§ 使用 MDX][use]
+* 如果你在使用该格式时遇到错误，请参见
+  [§ MDX 故障排除][trouble]
+
+[commonmark]: https://commonmark.org
+
+[commonmark-help]: https://commonmark.org/help/
+
+[iife]: https://developer.mozilla.org/en-US/docs/Glossary/IIFE
+
+[jsx]: https://reactjs.org/docs/introducing-jsx.html
+
+[jsx-spec]: https://facebook.github.io/jsx/
+
+[start]: /docs/getting-started/
+
+[trouble]: /docs/troubleshooting-mdx/
+
+[use]: /docs/using-mdx/
+
+[using-plugins]: /docs/extending-mdx/#using-plugins

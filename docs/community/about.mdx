@@ -1,0 +1,165 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'wooorm', name: 'Titus Wormer'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2021-10-06')
+}
+export const navSortSelf = 4
+
+# 关于
+
+本文简要介绍了 MDX 的由来以及它存在的原因。
+同时向那些帮助创建和启发 MDX 的人们表示感谢。
+
+{/* more */}
+
+## 什么是 MDX？
+
+MDX 是 Markdown 与 JSX 的结合。
+更多信息请参见[§ 什么是 MDX？][what]。
+
+## 为什么要有 MDX？
+
+Markdown 没有自定义组件的语法。
+MDX 解决了这个问题。
+
+虽然有很多语言在客观上比 Markdown 更好，但 Markdown 的优势在于：
+
+* 它看起来就是它所表达的意思，相对容易阅读
+* 虽然图片有时令人[困惑][confusing]，但大多数内容写起来都比较简单
+* 它宽松且有歧义性：可能不会正确渲染，但不会报错（对于在论坛上发表评论
+  忘记加星号的人来说很好）
+
+Markdown *确实*有一种扩展方式——HTML，但它有一些缺点：
+
+* Markdown 中的 HTML 处理很粗糙，解析方式有时不合理
+* HTML 默认不安全，所以有时会被（部分）不支持
+* HTML 和 Markdown 混合效果不好，导致一些令人困惑的规则，
+  例如需要空行或 `markdown="1"` 属性
+* HTML 与浏览器耦合，而 Markdown 还可以用于其他用途
+
+前端世界有一个 HTML 的替代方案：JSX。
+JSX 很好，原因包括：
+
+* 它的语法相对熟悉（类似 XML）
+* 它不绑定语义，专为编译器设计（可以有任意领域特定的含义）
+* 它严格且无歧义（如果作者忘记了一个斜杠，会提前报错，
+  而不是带着错误内容印刷出版）
+
+## 谁管理 MDX？
+
+该项目由
+[unified 集体][governance] 管理。
+
+## 谁创建了 MDX？
+
+将 [markdown][commonmark]、[JavaScript][] 和 [JSX][] 结合起来的想法
+是由以下人员共同努力的结果：
+[Guillermo Rauch][mdx-rauchg] (**[@rauchg][rauchg]**)、
+[James K. Nelson][mdx-jamesknelson] (**[@jamesknelson][jamesknelson]**)、
+[John Otander][mdx-johno] (**[@johno][johno]**)、
+Tim Neutkens (**[@timneutkens][timneutkens]**)、
+Brent Jackson (**[@jxnblk][jxnblk]**)、
+Jessica Stokes (**[@ticky][ticky]**) 等人。
+
+虽然以上所有人都对 MDX 至关重要，但我们要特别强调
+[John Otander][mdx-johno] (**[@johno][johno]**) 的贡献。
+John 编写了该项目第一个 alpha 版本以及后来的稳定版本 1 的大部分代码！
+
+## 谁设计了 Logo？
+
+[Logo 设计][design] 由 [Vercel][] 的 [Evil Rabbit][] 创建。
+
+## 哪些项目启发了 MDX？
+
+以下项目、语言和文章在实现或灵感方面帮助塑造了 MDX。
+
+[markdown][] 和 [JSX][] 语言启发了 MDX。
+Markdown 由 [John Gruber 创建][markdown] (**[@gruber][gruber]**)。
+[CommonMark][] 是最流行的 Markdown 变体，由 John McFarlane
+(**[@jgm][jgm]**) 等人创建。
+JSX 由 Sebastian Markbåge (**[@sebmarkbage][sebmarkbage]**) 等人
+在 Facebook, Inc. 创建。
+
+`@mdx-js/*` 项目目前大量使用 [unified][]（特别是
+[micromark][]、[remark][] 和 [rehype][]）以及 [Acorn][]。
+unified、remark、rehype 及相关工具由 Titus Wormer
+(**[@wooorm][wooorm]**) 等人创建。
+Acorn 由 Marijn Haverbeke (**[@marijnh][marijnh]**) 等人创建。
+
+以下项目最初启发了 `@mdx-js/*`：
+
+{/* 注意：请保留原始项目名称不变：*/}
+
+* [`jamesknelson/mdxc`](https://github.com/frontarm/mdx-util)
+* [`ticky/markdown-component-loader`](https://github.com/ticky/markdown-component-loader)
+* [`threepointone/markdown-in-js`](https://github.com/threepointone/markdown-in-js)
+* [`fazouane-marouane/remark-jsx`](https://github.com/remarkjs/remark-jsx)
+* [`mapbox/remark-react`](https://github.com/remarkjs/remark-react)
+* [`rx-ts/eslint-mdx`](https://github.com/mdx-js/eslint-mdx)
+
+以下文章最初启发了 `@mdx-js/*`：
+
+* [IA Markdown Content Blocks](https://github.com/iainc/Markdown-Content-Blocks)
+* [Idyll: Markup language for interactive documents](https://idyll-lang.org)
+
+[acorn]: https://github.com/acornjs/acorn
+
+[commonmark]: https://spec.commonmark.org/current/
+
+[confusing]: https://twitter.com/gruber/status/1246489863932821512
+
+[design]: https://github.com/mdx-js/design
+
+[evil rabbit]: https://evilrabb.it
+
+[governance]: https://github.com/unifiedjs/collective
+
+[gruber]: https://github.com/gruber
+
+[jamesknelson]: https://github.com/jamesknelson
+
+[javascript]: https://tc39.es/ecma262/
+
+[jgm]: https://github.com/jgm
+
+[johno]: https://github.com/johno
+
+[jsx]: https://facebook.github.io/jsx/
+
+[jxnblk]: https://github.com/jxnblk
+
+[marijnh]: https://github.com/marijnh
+
+[markdown]: https://daringfireball.net/2004/03/introducing_markdown
+
+[mdx-jamesknelson]: https://github.com/frontarm/mdx-util/tree/0f5f6d62bac4b83edc4bc3890dde3011079fa318
+
+[mdx-johno]: https://github.com/mdx-js/mdx/tree/a96ede2c104084ae21efa8bd95319011e558ec9d
+
+[mdx-rauchg]: https://spectrum.chat/frontend/general/mdx-proposal~1021be59-2738-4511-aceb-c66921050b9a
+
+[micromark]: https://github.com/micromark/micromark
+
+[rauchg]: https://github.com/rauchg
+
+[rehype]: https://github.com/rehypejs/rehype
+
+[remark]: https://github.com/remarkjs/remark
+
+[sebmarkbage]: https://github.com/sebmarkbage
+
+[ticky]: https://github.com/ticky
+
+[timneutkens]: https://github.com/timneutkens
+
+[unified]: https://unifiedjs.com
+
+[vercel]: https://vercel.com
+
+[what]: /docs/what-is-mdx/
+
+[wooorm]: https://github.com/wooorm

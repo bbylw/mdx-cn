@@ -1,0 +1,80 @@
+import {Note} from '../_component/note.jsx'
+
+export const info = {
+  author: [
+    {github: 'johno', name: 'John Otander'}
+  ],
+  modified: new Date('2025-01-27'),
+  published: new Date('2019-04-04')
+}
+export const navExclude = true
+
+<Note type="legacy">
+  **注意**：这是一篇旧的迁移指南。
+  请参见[§ 从 v1 迁移到 v2](/migrating/v2/)。
+  以下内容为历史目的而保留原样。
+</Note>
+
+# 从 v0 迁移到 v1
+
+很遗憾，我们不得不引入一些破坏性变更，因此我们编写了
+迁移指南。
+为了确保尽可能顺利的升级，我们计划在未来 12 个月内继续支持
+v0，所以不必急于更新（不过我们希望你能尽快更新）📆。
+
+## ⚠️ 破坏性变更
+
+* [🚨 `@mdx-js/tag` 被 `@mdx-js/react` 和 `mdx`
+  pragma 取代](#pragma) 🚨
+* [MDXProvider 现在在嵌套时合并组件上下文](#mdxprovider)
+* [React 支持现在要求 `@mdx-js/react` 中 `>= 16.8`](#react)
+
+## Pragma
+
+对于 v1，你需要移除 `@mdx-js/tag` 并用 `@mdx-js/react` 替换：
+
+```sh
+yarn remove @mdx-js/tag
+yarn add @mdx-js/react
+```
+
+### 有什么不同？
+
+MDXTag 实现已被移除，取而代之的是受
+[Emotion](https://emotion.sh/docs/css-prop#jsx-pragma) 启发的自定义 pragma 实现。
+这确保了转译后的 JSX 更具可读性，并且 JSX 块使用与
+其 Markdown 对应项相同的组件。
+它还允许 MDXProvider 提供全局组件作用域，如
+`Youtube` 组件。
+
+pragma 实现还会导致 JSX HTML 元素使用传递给 MDXProvider 的
+组件映射来渲染。
+因此，以下内容将产生两个相同渲染的 `h1`：
+
+```mdx
+# Hello, world!
+
+<h1>Hello, world!</h1>
+```
+
+[阅读博客文章了解更多](/blog/custom-pragma/)
+
+## MDXProvider
+
+这不应该影响大多数用例，但如果你嵌套组件上下文并依赖它们不被合并，
+你将不得不使用函数形式，它允许你自定义合并方式。
+通过忽略外部上下文组件并返回新的组件映射，你将恢复旧行为：
+
+```tsx
+<MDXProvider components={components}>
+  <MDXProvider components={outerComponents => newComponents}>
+    {children}
+  </MDXProvider>
+</MDXProvider>
+```
+
+## React
+
+在升级到 `@mdx-js/mdx@1` 之前，请将你的网站/应用更新到
+`react@16.8 react-dom@16.8` 并确保它按预期工作。
+然后升级到 v1。

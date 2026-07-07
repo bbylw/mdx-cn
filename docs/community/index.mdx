@@ -1,0 +1,42 @@
+{
+  /**
+   * @import {Item} from '../_component/sort.js'
+   */
+
+  /**
+   * @typedef Props
+   * @property {Item} navigationTree
+   */
+}
+
+import assert from 'node:assert/strict'
+import {NavigationGroup} from '../_component/nav.jsx'
+
+export const info = {
+  author: [{name: 'MDX 贡献者'}],
+  modified: new Date('2024-07-04'),
+  published: new Date('2021-11-01')
+}
+export const navSortSelf = 6
+
+# 社区
+
+这些页面说明了如何贡献、获取帮助、赞助我们、分享你的作品，
+以及一些背景信息。
+
+{
+  (function () {
+    const navigationTree = props.navigationTree
+    const category = navigationTree.children.find(function (item) {
+      return item.name === '/community/'
+    })
+    assert(category)
+
+    return (
+      <nav>
+        <NavigationGroup items={category.children} includeDescription />
+      </nav>
+    )
+  })()
+}
+
